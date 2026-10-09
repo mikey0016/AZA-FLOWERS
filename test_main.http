@@ -1,0 +1,23 @@
+# AZA FLOWERS — API test
+GET http://127.0.0.1:8000/
+###
+GET http://127.0.0.1:8000/health
+Accept: application/json
+###
+GET http://127.0.0.1:8000/api/config
+Accept: application/json
+###
+GET http://127.0.0.1:8000/api/categories
+Accept: application/json
+###
+GET http://127.0.0.1:8000/api/products?category=buketlar&sort=cheap
+Accept: application/json
+###
+GET http://127.0.0.1:8000/api/products/qizil-atirgul-25
+Accept: application/json
+###
+POST http://127.0.0.1:8000/api/orders
+Content-Type: application/json
+
+{"name": "Aza", "phone": "+998901234567", "address": "Toshkent, Chilonzor 12", "comment": "Tabriknoma qo'shing", "items": [{"slug": "pushti-lolalar", "qty": 1}]}
+###

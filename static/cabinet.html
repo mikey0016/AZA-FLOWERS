@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shaxsiy kabinet — AZA FLOWERS</title>
+<meta name="theme-color" content="#080706">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css?v=10">
+<link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+</head>
+<body>
+<header class="header">
+  <div class="container htop">
+    <a class="logo" href="/"><img class="mark" src="/static/logo.svg" alt="AZA"><span>AZA<small>FLOWERS • TASHKENT</small></span></a>
+    <div class="hsp"></div><span id="authArea"></span>
+  </div>
+  <div class="hnav"><div class="container nav"><a href="/">Bosh sahifa</a><a href="/#katalog">Katalog</a><a href="/about">Biz haqimizda</a><a href="/track">Kuzatish</a></div></div>
+</header>
+<main class="container page" style="max-width:760px">
+  <span class="badge"><span class="dot"></span> SHAXSIY KABINET</span>
+  <h1>Mening <span class="p">buyurtmalarim</span></h1>
+  <div id="myBox"></div>
+</main>
+<footer>
+  <div class="container fgrid">
+    <div class="fbrand">
+      <div class="flogo"><img src="/static/logo.svg" alt="AZA"><span>AZA FLOWERS</span></div>
+      <p class="m">Toshkentdagi premium gul uyi. Sevgi, to'y, tug'ilgan kun — har qanday kunni unutilmas qiling.</p>
+      <div class="social"><a id="tgBtnF" target="_blank">Telegram kanal</a><a id="insBtnF" target="_blank">Instagram</a></div>
+    </div>
+    <div><b class="fh">Katalog</b><div class="flinks" id="footCats"></div></div>
+    <div><b class="fh">Kontakt</b><div id="footContact"></div><a class="totop" href="#top">↑ Yuqoriga qaytish</a></div>
+  </div>
+  <div class="fbottom"><div class="container fbin"><span>© 2026 AZA FLOWERS — barcha huquqlar himoyalangan</span><span>Har kuni 08:00 – 22:00</span></div></div>
+</footer>
+<script src="/static/auth.js?v=1"></script>
+<script>
+const fmtC=n=>n.toLocaleString('uz-UZ').replace(/,/g,' ')+" so'm";
+(async()=>{
+  const box=document.getElementById('myBox');
+  if(!Auth.token){
+    box.innerHTML=`<div class="obox"><h3>Kirish talab qilinadi</h3><p>Buyurtmalaringizni ko'rish uchun telefon va parolingizni kiriting.</p><div class="form"><input id="cPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="cPass" type="password" placeholder="Parol"><button class="btn btn-p" id="cGo">Kirish →</button></div><p class="hint">Hisobingiz yo'qmi? <a href="/#kirish" style="color:var(--gold2)">Bosh sahifada ro'yxatdan o'ting</a></p></div>`;
+    document.getElementById('cGo').onclick=async()=>{
+      const ph=document.getElementById('cPhone').value.trim(),pw=document.getElementById('cPass').value;
+      const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:ph,password:pw})});
+      const d=await r.json();
+      if(!r.ok){box.insertAdjacentHTML('beforeend','<p class="hint">'+(d.detail||'Xatolik')+'</p>');return}
+      Auth.save(d.token,d.user);location.reload();
+    };
+    return;
+  }
+  box.innerHTML='<div class="empty">Yuklanmoqda...</div>';
+  const r=await fetch('/api/orders/mine',{headers:Auth.headers()});
+  if(r.status===401){Auth.clear();location.reload();return}
+  const orders=await r.json();
+  if(!orders.length){box.innerHTML='<div class="empty">Hali buyurtmalaringiz yo\'q<br><a class="btn btn-p" style="margin-top:12px;display:inline-block" href="/#katalog">Gul tanlash</a></div>';return}
+  box.innerHTML=orders.map(o=>{
+    const st=o.status==='qabul'?'<span class="st st-ok">Qabul qilingan</span>':'<span class="st st-new">Tayyorlanmoqda</span>';
+    return `<div class="oline"><div><b>#${o.id}</b> ${st}<div style="color:var(--muted);font-size:13px">${o.created_at} • ${o.lines.map(l=>l.name+' × '+l.qty).join(', ')}</div></div><b style="color:var(--gold2)">${fmtC(o.total)}</b></div>`;
+  }).join('');
+})();
+</script>
+</body></html>
