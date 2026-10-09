@@ -1,0 +1,385 @@
+{
+  "products": [
+    {
+      "slug": "million-atirgul",
+      "name": "«Million atirgul» buketi",
+      "category": "buketlar",
+      "price": 1450000,
+      "old_price": 1650000,
+      "stock": 6,
+      "is_featured": 1,
+      "description": "101 dona yangi uzilgan qizil atirgul, atlas lenta va premium o'ramda. Sevgi izhor qilish uchun eng kuchli tanlov.",
+      "img": {
+        "petals": 14,
+        "petal": "#d92b3a",
+        "center": "#f6c445",
+        "bg": [
+          "#fff1f2",
+          "#ffe0e3"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 12
+    },
+    {
+      "slug": "qizil-atirgul-25",
+      "name": "Qizil atirgul — 25 dona",
+      "category": "atirgullar",
+      "price": 890000,
+      "old_price": null,
+      "stock": 14,
+      "is_featured": 1,
+      "description": "Ekador navli qizil atirgullar, 60 sm uzunlikda. Har bir gul qo'lda saralangan.",
+      "img": {
+        "petals": 12,
+        "petal": "#c81e2b",
+        "center": "#f7d078",
+        "bg": [
+          "#fff5f5",
+          "#ffe3e3"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "oq-atirgul-kompozitsiya",
+      "name": "Oq atirgul kompozitsiyasi",
+      "category": "kompozitsiyalar",
+      "price": 720000,
+      "old_price": null,
+      "stock": 9,
+      "is_featured": 1,
+      "description": "Oq atirgul, evkalipt va oq lavanda shamdon bilan shisha vazada. Nafis va xotirjam.",
+      "img": {
+        "petals": 12,
+        "petal": "#ffffff",
+        "center": "#ffd977",
+        "bg": [
+          "#f8fafc",
+          "#e6eef6"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "pushti-lolalar",
+      "name": "Pushti lolalar buketi",
+      "category": "buketlar",
+      "price": 540000,
+      "old_price": 610000,
+      "stock": 20,
+      "is_featured": 1,
+      "description": "Gollandiyadan keltirilgan 25 dona pushti lola. Bahor kayfiyatini sovg'a qiling.",
+      "img": {
+        "petals": 6,
+        "petal": "#f472b6",
+        "center": "#fff1f6",
+        "bg": [
+          "#fdf2f8",
+          "#fce7f3"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 11
+    },
+    {
+      "slug": "bahor-savati",
+      "name": "Bahor savati",
+      "category": "kompozitsiyalar",
+      "price": 980000,
+      "old_price": null,
+      "stock": 7,
+      "is_featured": 1,
+      "description": "Tulip, gortenziya va kamonni birlashtirgan katta savat kompozitsiyasi.",
+      "img": {
+        "petals": 16,
+        "petal": "#f59ec4",
+        "center": "#f9c74f",
+        "bg": [
+          "#fef6ee",
+          "#fde8d7"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "kungaboqar-quvonchi",
+      "name": "«Kungaboqar quvonchi» buketi",
+      "category": "buketlar",
+      "price": 430000,
+      "old_price": null,
+      "stock": 12,
+      "is_featured": 0,
+      "description": "Quyoshli kungaboqarlar va yashil barglar. Tug'ilgan kun uchun eng quvnoq sovg'a.",
+      "img": {
+        "petals": 18,
+        "petal": "#f4b33c",
+        "center": "#7a4a1f",
+        "bg": [
+          "#fffbeb",
+          "#fef3c7"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "pionlar-nafosati",
+      "name": "Pionlar nafosati",
+      "category": "buketlar",
+      "price": 620000,
+      "old_price": null,
+      "stock": 11,
+      "is_featured": 2,
+      "description": "Katta ochilgan pushti pionlar — romantik kechalar uchun ideal.",
+      "img": {
+        "petals": 20,
+        "petal": "#ef8fb4",
+        "center": "#ffe6f0",
+        "bg": [
+          "#fff1f7",
+          "#ffe1ed"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "orkide-kompozitsiya",
+      "name": "Orkide kompozitsiyasi",
+      "category": "kompozitsiyalar",
+      "price": 1100000,
+      "old_price": null,
+      "stock": 5,
+      "is_featured": 2,
+      "description": "Ikki tarmoqli falenopsis orkide, keramik vaza va dekorativ toshlar bilan.",
+      "img": {
+        "petals": 10,
+        "petal": "#b98ce0",
+        "center": "#ffd166",
+        "bg": [
+          "#f6f2ff",
+          "#ece2ff"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "shokolad-atirgul-sovga",
+      "name": "Shokolad va atirgul sovg'asi",
+      "category": "sovgalar",
+      "price": 780000,
+      "old_price": 850000,
+      "stock": 15,
+      "is_featured": 0,
+      "description": "15 dona atirgul + Belgian shokolad to'plami. Bitta sovg'a, ikki quvonch.",
+      "img": {
+        "petals": 13,
+        "petal": "#e0576f",
+        "center": "#5b3a29",
+        "bg": [
+          "#fdf2f3",
+          "#fbe0e4"
+        ],
+        "leaves": false
+      },
+      "active": 1,
+      "discount_pct": 8
+    },
+    {
+      "slug": "toy-buketi-oq-bulut",
+      "name": "To'y buketi «Oq bulut»",
+      "category": "toy",
+      "price": 1250000,
+      "old_price": null,
+      "stock": 4,
+      "is_featured": 1,
+      "description": "Kelinning qo'li uchun oq atirgul, peoniya va ipak lentadan tayyorlangan buket.",
+      "img": {
+        "petals": 15,
+        "petal": "#ffffff",
+        "center": "#f7e6a6",
+        "bg": [
+          "#f9fafb",
+          "#eef2f7"
+        ],
+        "leaves": true
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "fikus-xona-uchun",
+      "name": "Xona uchun fikus",
+      "category": "xonalar",
+      "price": 320000,
+      "old_price": null,
+      "stock": 10,
+      "is_featured": 0,
+      "description": "Balandligi 90 sm, tozalovchi xususiyatga ega fikus. Gilamcha bilan.",
+      "img": {
+        "petals": 7,
+        "petal": "#5aa469",
+        "center": "#2f6b41",
+        "bg": [
+          "#f0fdf4",
+          "#dcfce7"
+        ],
+        "leaves": false
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "sukkulentlar-toplami",
+      "name": "Sukkulentlar to'plami",
+      "category": "xonalar",
+      "price": 180000,
+      "old_price": 210000,
+      "stock": 24,
+      "is_featured": 0,
+      "description": "Uch dona turli sukkulent, kichik keramika idishlarda. Ish stoli uchun.",
+      "img": {
+        "petals": 9,
+        "petal": "#8bbf72",
+        "center": "#3f7d4f",
+        "bg": [
+          "#f2fbf4",
+          "#e0f5e6"
+        ],
+        "leaves": false
+      },
+      "active": 1,
+      "discount_pct": 14
+    },
+    {
+      "slug": "gul-barglari-yolagi",
+      "name": "Gul barglari yo'lagi",
+      "category": "sovgalar",
+      "price": 450000,
+      "old_price": null,
+      "stock": 30,
+      "is_featured": 0,
+      "description": "Mashina yoki uy yo'lini bezash uchun 2000 dona tabiiy atirgul barglari.",
+      "img": {
+        "petals": 6,
+        "petal": "#d6455d",
+        "center": "#ffe0e6",
+        "bg": [
+          "#fff1f4",
+          "#ffe4ea"
+        ],
+        "leaves": false
+      },
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "slug": "mavsumiy-aralash-buket",
+      "name": "Mavsumiy aralash buket",
+      "category": "buketlar",
+      "price": 380000,
+      "old_price": null,
+      "stock": 18,
+      "is_featured": 0,
+      "description": "Mavsumning eng yangi gullaridan tuzilgan aralash buket. Har kuni o'zgaradi.",
+      "img": {
+        "petals": 17,
+        "petal": "#f08bb6",
+        "center": "#ffd166",
+        "bg": [
+          "#fff7fb",
+          "#ffe9f3"
+        ],
+        "leaves": true
+      },
+      "photo": "/static/uploads/mavsumiy-aralash-buket_1791556816.jpg",
+      "active": 1,
+      "discount_pct": 0
+    },
+    {
+      "name": "Xojaka",
+      "category": "buketlar",
+      "price": 1000000,
+      "old_price": null,
+      "stock": 10,
+      "description": "Juda zo'r qul",
+      "is_featured": 0,
+      "img": {
+        "petals": 12,
+        "petal": "#f472b6",
+        "center": "#ffd166",
+        "bg": [
+          "#fff7fb",
+          "#ffe9f3"
+        ],
+        "leaves": true
+      },
+      "photo": "/static/uploads/xojaka_1791557471.jpg",
+      "slug": "xojaka",
+      "active": 1,
+      "discount_pct": 0
+    }
+  ],
+  "categories": [
+    {
+      "slug": "buketlar",
+      "name": "Buketlar",
+      "icon": "bouquet"
+    },
+    {
+      "slug": "atirgullar",
+      "name": "Atirgullar",
+      "icon": "rose"
+    },
+    {
+      "slug": "kompozitsiyalar",
+      "name": "Kompozitsiyalar",
+      "icon": "composition"
+    },
+    {
+      "slug": "sovgalar",
+      "name": "Sovg'a to'plamlari",
+      "icon": "gift"
+    },
+    {
+      "slug": "xonalar",
+      "name": "Xona o'simliklari",
+      "icon": "plant"
+    },
+    {
+      "slug": "toy",
+      "name": "To'y va marosim",
+      "icon": "wedding"
+    }
+  ],
+  "contact": {
+    "phones": [
+      "+998 90 350 71 78",
+      "+998 77 497 71 78",
+      "+998 50 020 77 86"
+    ],
+    "telegram": "https://t.me/azaflowers",
+    "admins": [
+      "@Aziz_Raximov",
+      "@wviiiiw",
+      "@XA_XAUUSD"
+    ],
+    "instagram": "https://instagram.com/aza.flowers",
+    "address": "Toshkent sh., Chilonzor tumani, Bunyodkor shoh ko'chasi 12",
+    "hours": "Har kuni 08:00 - 22:00"
+  },
+  "delivery_note": "Toshkent shahri bo'ylab Yandex orqali, 3 soatgacha. Yetkazish haqi alohida to'lanadi."
+}
