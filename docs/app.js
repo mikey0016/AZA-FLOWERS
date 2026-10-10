@@ -123,6 +123,23 @@ function openDrawer(){$('#drawer').classList.add('show');$('#overlay').classList
 function closeDrawer(){$('#drawer').classList.remove('show');$('#overlay').classList.remove('show')}
 window.closeDrawer=closeDrawer;
 const CO={ship:'standard',pay:'cash',loc:null};
+function escA(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function coProfile(){try{return JSON.parse(localStorage.getItem('aza_profile')||'{}')}catch(e){return{}}}
+function saveProfile(f){try{localStorage.setItem('aza_profile',JSON.stringify(f))}catch(e){}}
+function maskPhone(inp){
+  if(!inp||inp._masked)return; inp._masked=true;
+  inp.addEventListener('input',()=>{
+    let d=inp.value.replace(/\D/g,'');
+    if(d.startsWith('998'))d=d.slice(3);
+    d=d.slice(0,9);
+    let out='+998';
+    if(d.length>0)out+=' '+d.slice(0,2);
+    if(d.length>2)out+=' '+d.slice(2,5);
+    if(d.length>5)out+=' '+d.slice(5,7);
+    if(d.length>7)out+=' '+d.slice(7,9);
+    inp.value=d.length?out:'';
+  });
+}
 const SHIP_LABEL={standard:'Standart (Yandex, 3 soat)',express:'Tezkor (1 soat)'};
 const PAY_LABEL={cash:"Naqd / yetkazib berishda",card:'Plastik karta (terminal)',online:"Online to'lov (Click / Payme)"};
 const REGIONS=['Toshkent shahri','Toshkent viloyati','Samarqand','Buxoro','Andijon',"Farg'ona",'Namangan','Qashqadaryo','Surxondaryo','Xorazm','Navoiy','Jizzax','Sirdaryo',"Qoraqalpog'iston"];
@@ -137,21 +154,21 @@ function coTotals(){
 window.openCheckout=()=>{
   if(!cartItems().length)return;
   CO.ship='standard';CO.pay='cash';
+  const pr=coProfile();
   const t=coTotals();
   $('#coBody').innerHTML=`
   <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtmani rasmiylashtirish</h2>
   <p style="color:var(--muted);font-size:13.5px">Buyurtma uchun <b>50% oldindan to'lov</b> qilinadi.</p>
   <div class="cform" style="margin-top:14px">
     <div><h3>Aloqa ma'lumotlari</h3><div class="fgrid2" style="margin-top:10px">
-      <label class="fld"><span>Ism *</span><input id="fName"></label>
-      <label class="fld"><span>Telefon *</span><input id="fPhone" placeholder="+998 __ ___ __ __"></label>
+      <label class="fld"><span>Ism *</span><input id="fName" value="${escA(pr.name)}"></label>
+      <label class="fld"><span>Telefon *</span><input id="fPhone" inputmode="tel" placeholder="+998 __ ___ __ __" value="${escA(pr.phone)}"></label>
     </div></div>
     <div><h3>Yetkazib berish manzili</h3><div class="fgrid2" style="margin-top:10px">
-      <label class="fld"><span>Hudud *</span><select id="fRegion">${REGIONS.map(r=>`<option>${r}</option>`).join('')}</select></label>
-      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" placeholder="Masalan: Chilonzor"></label>
-      <label class="fld full"><span>Manzil (ko'cha, uy) *</span><input id="fAddr" placeholder="Masalan: Bunyodkor shoh ko'chasi 12"></label>
-      <div class="fld full"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
-      <label class="fld full"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, tabriknoma matni..."></label>
+      <label class="fld"><span>Hudud *</span><select id="fRegion">${REGIONS.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
+      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" placeholder="Masalan: Chilonzor" value="${escA(pr.city)}"></label>
+      <label class="fld full"><span>Manzil (ko'cha, uy) *</span><input id="fAddr" placeholder="Masalan: Bunyodkor shoh ko'chasi 12" value="${escA(pr.address)}"></label>
+      <label class="fld full"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, tabriknoma matni..." value="${escA(pr.note)}"></label>
     </div></div>
     <div><h3>Yetkazish usuli</h3><div class="radio-cards" style="margin-top:10px">
       <label class="radio-card"><input type="radio" name="ship" value="standard" checked><span><b>Standart</b><small>Yandex orqali 3 soatgacha · alohida to'lanadi</small></span></label>
@@ -171,6 +188,7 @@ window.openCheckout=()=>{
   document.querySelectorAll('input[name=pay]').forEach(r=>r.onchange=()=>{CO.pay=r.value});
   $('#sendOrder').onclick=sendOrderD;
   refreshCoD();closeDrawer();openModal('#cmodal');
+  maskPhone($('#fPhone'));
   setTimeout(initCoMapD,120);
 };
 let coMapD=null,coMarkerD=null;
@@ -219,6 +237,7 @@ function sendOrderD(){
   const items=cartItems();
   if(name.length<2)return toast('Ismingizni yozing');if(phone.replace(/\D/g,'').length<9)return toast('Telefonni to‘g‘ri kiriting');
   if(city.length<2)return toast('Tuman / shaharni yozing');if(addr.length<5&&!CO.loc)return toast('Manzilni yozing yoki xaritadan belgilang 📍');if(!items.length)return toast('Savat bo‘sh');
+  saveProfile({name,phone,region,city,address:addr,note});
   const t=coTotals();
   const lines=items.map(i=>`• ${i.name} — ${i.qty} dona — ${fmt(i.price*i.qty)}`).join('\n');
   const locLine=CO.loc?`\n🗺 Xarita: https://maps.google.com/?q=${CO.loc.lat},${CO.loc.lon}`:'';
