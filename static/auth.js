@@ -20,13 +20,13 @@ async function paintAuth() {
   const el = document.getElementById('authArea'); if (!el) return;
   const u = Auth.cached() || await Auth.me();
   if (u) {
-    el.innerHTML = `<a class="pill" href="/cabinet">${u.name.split(' ')[0]} → Kabinet</a> <button class="pill" id="loBtn">Chiqish</button>`;
+    el.innerHTML = `<a class="linkbtn" href="/cabinet">${u.name.split(' ')[0]} → Kabinet</a> <button class="linkbtn" id="loBtn">Chiqish</button>`;
     document.getElementById('loBtn').onclick = async () => {
       try { await fetch('/api/auth/logout', { method: 'POST', headers: Auth.headers() }); } catch (e) {}
       Auth.clear(); location.reload();
     };
   } else {
-    el.innerHTML = `<a class="pill" href="/#kirish">Kirish</a>`;
+    el.innerHTML = `<a class="linkbtn dark" href="/#kirish">Kirish</a>`;
   }
 }
 async function fillFooter() {
