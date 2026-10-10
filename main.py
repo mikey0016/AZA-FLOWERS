@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from app.seed import CATEGORIES, DELIVERY_NOTE, CONTACT
 from app import store as pstore
 from app import users as usersmod
+from app import payments as paymod
 from app.bot import load_chats
 from app.telegram import broadcast_order, get_updates, load_settings as tg_settings, notify_admins, order_text
 
@@ -20,6 +21,19 @@ BASE_DIR = Path(__file__).parent
 STATIC_DIR = BASE_DIR / "static"
 ORDERS_FILE = BASE_DIR / "orders.json"
 STATIC_DIR.mkdir(exist_ok=True)
+
+# SAMA uslubidagi to'lov: viloyatlar + yetkazish turlari
+REGIONS = ["Toshkent shahri", "Toshkent viloyati", "Samarqand", "Buxoro", "Andijon",
+           "Farg'ona", "Namangan", "Qashqadaryo", "Surxondaryo", "Xorazm",
+           "Navoiy", "Jizzax", "Sirdaryo", "Qoraqalpog'iston"]
+SHIP_OPTIONS = [
+    {"slug": "standard", "name": "Standart", "hint": "Yandex orqali 3 soatgacha · alohida to'lanadi", "fee": 0},
+    {"slug": "express", "name": "Tezkor", "hint": "1 soatda · +30 000 so'm", "fee": 30000},
+]
+SHIP_FEE = {s["slug"]: s["fee"] for s in SHIP_OPTIONS}
+SHIP_LABEL = {"standard": "Standart (Yandex, 3 soat)", "express": "Tezkor (1 soat)"}
+PAY_LABEL = {"cash": "Naqd / yetkazib berishda", "card": "Plastik karta (terminal)",
+             "online": "Online to'lov (Click / Payme)"}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -75,7 +89,10 @@ async def health():
 
 @app.get("/api/config")
 async def config():
-    return {"delivery_fee": 0, "free_delivery_from": None, "delivery_note": DELIVERY_NOTE, "contact": CONTACT}
+    pay = paymod.get_payment(BASE_DIR)
+    return {"delivery_fee": 0, "free_delivery_from": None, "delivery_note": DELIVERY_NOTE,
+            "contact": CONTACT, "pay_card": pay["pay_card"], "prepay_pct": pay["prepay_pct"],
+            "regions": REGIONS, "ship": SHIP_OPTIONS}
 
 @app.get("/api/categories")
 async def categories():
@@ -147,6 +164,82 @@ async def create_order(o: OrderIn, bg: BackgroundTasks, request: Request):
 @app.get("/api/orders")
 async def list_orders():
     return load_orders()[-20:][::-1]
+
+class OrderItem2(BaseModel):
+    slug: str
+    qty: int = Field(ge=1, le=50)
+
+class OrderNew(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    phone: str = Field(min_length=7, max_length=20)
+    region: Optional[str] = ""
+    city: Optional[str] = ""
+    address: Optional[str] = ""
+    note: Optional[str] = ""
+    comment: Optional[str] = ""
+    ship: Optional[str] = "standard"
+    pay: Optional[str] = "cash"
+    promo: Optional[str] = ""
+    items: list[OrderItem2]
+
+@app.get("/api/promo")
+async def promo_check(code: str = ""):
+    return paymod.check_promo(BASE_DIR, code)
+
+@app.post("/api/order")
+async def create_order2(o: OrderNew, bg: BackgroundTasks, request: Request):
+    totals = calc_totals([x.model_dump() for x in o.items])
+    subtotal = totals["subtotal"]
+    ship = o.ship if o.ship in SHIP_FEE else "standard"
+    ship_cost = SHIP_FEE[ship]
+    promo_code = (o.promo or "").strip().upper()
+    discount, pct = 0, 0
+    if promo_code:
+        chk = paymod.check_promo(BASE_DIR, promo_code)
+        if not chk.get("ok"):
+            raise HTTPException(400, chk.get("error", "Promokod yaroqsiz"))
+        pct = chk["pct"]
+        discount = round(subtotal * pct / 100)
+    total = subtotal - discount + ship_cost
+    pay = paymod.get_payment(BASE_DIR)
+    prepay = round(total * pay["prepay_pct"] / 100)
+    if promo_code:
+        paymod.use_promo(BASE_DIR, promo_code)
+    u = usersmod.me_by_token(BASE_DIR, _bearer(request))
+    oid = int(time.time() * 1000) % 1000000
+    addr = ", ".join(x for x in [o.region, o.city, o.address] if x) or o.address
+    order = {
+        "id": oid, "no": f"AZA-{oid}",
+        "user_id": u["id"] if u else None,
+        "name": o.name.strip(), "phone": o.phone.strip(),
+        "address": addr.strip(), "note": (o.note or "").strip(),
+        "comment": (o.comment or "").strip(),
+        "ship": ship, "ship_label": SHIP_LABEL[ship],
+        "pay": o.pay if o.pay in PAY_LABEL else "cash",
+        "pay_label": PAY_LABEL.get(o.pay, PAY_LABEL["cash"]),
+        "promo": promo_code, "discount": discount, "discount_pct": pct,
+        "subtotal": subtotal, "ship_cost": ship_cost,
+        "total": total, "prepay": prepay,
+        "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "awaiting_payment",
+        "accepted_by": None, "tg_user": None, "check_file": "", "notified": 0,
+        **{"lines": totals["lines"], "delivery": ship_cost,
+           "delivery_note": DELIVERY_NOTE},
+    }
+    save_order(order)
+    from app import telegram as tgmod
+    return {"ok": True, "id": oid, "no": order["no"], "order_id": oid,
+            "discount": discount, "total": total, "prepay": prepay,
+            "bot_url": tgmod.order_bot_url(BASE_DIR, oid)}
+
+@app.get("/api/order")
+async def order_status(id: int):
+    for o in load_orders():
+        if o.get("id") == id:
+            return {"ok": True, "id": o["id"], "no": o.get("no", f"AZA-{o['id']}"),
+                    "status": o.get("status", "yangi"), "total": o.get("total", 0),
+                    "prepay": o.get("prepay", 0)}
+    raise HTTPException(404, "Buyurtma topilmadi")
 
 @app.get("/api/telegram/status")
 async def tg_status():

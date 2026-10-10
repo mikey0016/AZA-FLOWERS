@@ -122,7 +122,79 @@ window.closeModal=closeModal;
 function openDrawer(){$('#drawer').classList.add('show');$('#overlay').classList.add('show');renderCart()}
 function closeDrawer(){$('#drawer').classList.remove('show');$('#overlay').classList.remove('show')}
 window.closeDrawer=closeDrawer;
-window.openCheckout=()=>{const items=cartItems();if(!items.length)return;const sub=items.reduce((a,i)=>a+i.price*i.qty,0);$('#sumLine').textContent=`${items.length} tur • Gullar: ${fmt(sub)}. Yetkazish Yandex'ga alohida to'lanadi.`;closeDrawer();openModal('#cmodal')};
+const CO={ship:'standard',pay:'cash'};
+const SHIP_LABEL={standard:'Standart (Yandex, 3 soat)',express:'Tezkor (1 soat)'};
+const PAY_LABEL={cash:"Naqd / yetkazib berishda",card:'Plastik karta (terminal)',online:"Online to'lov (Click / Payme)"};
+const REGIONS=['Toshkent shahri','Toshkent viloyati','Samarqand','Buxoro','Andijon',"Farg'ona",'Namangan','Qashqadaryo','Surxondaryo','Xorazm','Navoiy','Jizzax','Sirdaryo',"Qoraqalpog'iston"];
+function coTotals(){
+  const items=cartItems();
+  const sub=items.reduce((a,i)=>a+i.price*i.qty,0);
+  const ship=CO.ship==='express'?30000:0;
+  const total=sub+ship;
+  const prepay=Math.round(total/2);
+  return {items,sub,ship,total,prepay,rest:total-prepay};
+}
+window.openCheckout=()=>{
+  if(!cartItems().length)return;
+  CO.ship='standard';CO.pay='cash';
+  const t=coTotals();
+  $('#coBody').innerHTML=`
+  <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtmani rasmiylashtirish</h2>
+  <p style="color:var(--muted);font-size:13.5px">Buyurtma uchun <b>50% oldindan to'lov</b> qilinadi.</p>
+  <div class="cform" style="margin-top:14px">
+    <div><h3>Aloqa ma'lumotlari</h3><div class="fgrid2" style="margin-top:10px">
+      <label class="fld"><span>Ism *</span><input id="fName"></label>
+      <label class="fld"><span>Telefon *</span><input id="fPhone" placeholder="+998 __ ___ __ __"></label>
+    </div></div>
+    <div><h3>Yetkazib berish manzili</h3><div class="fgrid2" style="margin-top:10px">
+      <label class="fld"><span>Hudud *</span><select id="fRegion">${REGIONS.map(r=>`<option>${r}</option>`).join('')}</select></label>
+      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" placeholder="Masalan: Chilonzor"></label>
+      <label class="fld full"><span>Manzil (ko'cha, uy) *</span><input id="fAddr" placeholder="Masalan: Bunyodkor shoh ko'chasi 12"></label>
+      <label class="fld full"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, tabriknoma matni..."></label>
+    </div></div>
+    <div><h3>Yetkazish usuli</h3><div class="radio-cards" style="margin-top:10px">
+      <label class="radio-card"><input type="radio" name="ship" value="standard" checked><span><b>Standart</b><small>Yandex orqali 3 soatgacha · alohida to'lanadi</small></span></label>
+      <label class="radio-card"><input type="radio" name="ship" value="express"><span><b>Tezkor</b><small>1 soatda · +30 000 so'm</small></span></label>
+    </div></div>
+    <div><h3>To'lov usuli</h3><div class="radio-cards" style="margin-top:10px">
+      <label class="radio-card"><input type="radio" name="pay" value="cash" checked><span><b>Naqd / yetkazib berishda</b><small>Kuryerga naqd to'lov</small></span></label>
+      <label class="radio-card"><input type="radio" name="pay" value="card"><span><b>Plastik karta</b><small>Yetkazib berishda terminal</small></span></label>
+      <label class="radio-card"><input type="radio" name="pay" value="online"><span><b>Online to'lov</b><small>Payme / Click</small></span></label>
+    </div></div>
+    <div class="prepay" id="coPrepay"></div>
+    <div id="coSummary"></div>
+    <button class="btn btn-acc" id="sendOrder" style="width:100%">Buyurtmani tasdiqlash →</button>
+    <p class="hint">🔒 Ma'lumotlaringiz xavfsiz saqlanadi</p>
+  </div>`;
+  document.querySelectorAll('input[name=ship]').forEach(r=>r.onchange=()=>{CO.ship=r.value;refreshCoD()});
+  document.querySelectorAll('input[name=pay]').forEach(r=>r.onchange=()=>{CO.pay=r.value});
+  $('#sendOrder').onclick=sendOrderD;
+  refreshCoD();closeDrawer();openModal('#cmodal');
+};
+function refreshCoD(){
+  const t=coTotals();
+  $('#coPrepay').innerHTML=`<span class="pl">Oldindan to'lov · 50%</span><div class="big">${fmt(t.prepay)}</div>
+  <div class="rest">Qolgan <b>${fmt(t.rest)}</b> yetkazib berishda to'lanadi</div>
+  <div class="cardn">💳 To'lov kartasi: operatorimiz sizga shu chat orqali yuboradi.</div>`;
+  $('#coSummary').innerHTML=t.items.map(i=>`<div class="sumrow"><span>${i.name} × ${i.qty}</span><b>${fmt(i.price*i.qty)}</b></div>`).join('')
+    +`<div class="sumrow"><span>Yetkazish (${SHIP_LABEL[CO.ship]})</span><b>${t.ship?fmt(t.ship):"Yandex alohida"}</b></div>`
+    +`<div class="sumrow total"><span>Jami</span><b>${fmt(t.total)}</b></div>`
+    +`<div class="sumrow pre"><span>Oldindan 50%</span><b>${fmt(t.prepay)}</b></div>`;
+}
+function sendOrderD(){
+  const name=$('#fName').value.trim(),phone=$('#fPhone').value.trim(),addr=$('#fAddr').value.trim();
+  const region=$('#fRegion').value,city=$('#fCity').value.trim(),note=$('#fNote').value.trim();
+  const items=cartItems();
+  if(name.length<2)return toast('Ismingizni yozing');if(phone.replace(/\D/g,'').length<9)return toast('Telefonni to‘g‘ri kiriting');
+  if(city.length<2)return toast('Tuman / shaharni yozing');if(addr.length<5)return toast('Manzilni yozing');if(!items.length)return toast('Savat bo‘sh');
+  const t=coTotals();
+  const lines=items.map(i=>`• ${i.name} — ${i.qty} dona — ${fmt(i.price*i.qty)}`).join('\n');
+  const msg=`🌷 AZA FLOWERS — yangi buyurtma (sayt)\n👤 ${name}\n📞 ${phone}\n📍 ${region}, ${city}, ${addr}\n💬 ${note||'-'}\n🚚 ${SHIP_LABEL[CO.ship]}\n💳 ${PAY_LABEL[CO.pay]}\n\n${lines}\n\nJami: ${fmt(t.total)}\nOldindan 50%: ${fmt(t.prepay)}`;
+  try{navigator.clipboard.writeText(msg).catch(()=>{})}catch(e){}
+  window.open((CFG.contact&&CFG.contact.telegram)||'https://t.me/azaflowers','_blank');
+  cart={};localStorage.setItem('aza_cart','{}');renderCart();closeModal('#cmodal');
+  toast('Buyurtma matni nusxalandi — Telegramda yuboring 🌷');
+}
 let curSlide=0,slideTimer=null;
 function showSlide(i){const slides=document.querySelectorAll('.slide');if(!slides.length)return;curSlide=(i+slides.length)%slides.length;slides.forEach((s,k)=>s.classList.toggle('on',k===curSlide));document.querySelectorAll('#slideDots button').forEach((d,k)=>d.classList.toggle('on',k===curSlide))}
 function initSlider(){const slides=document.querySelectorAll('.slide');const dots=$('#slideDots');if(dots&&!dots.innerHTML)dots.innerHTML=[...slides].map((_,k)=>`<button data-dot="${k}" class="${k===0?'on':''}"></button>`).join('');dots.onclick=e=>{const b=e.target.closest('[data-dot]');if(b){showSlide(+b.dataset.dot);restartAuto()}};$('#slidePrev').onclick=()=>{showSlide(curSlide-1);restartAuto()};$('#slideNext').onclick=()=>{showSlide(curSlide+1);restartAuto()};restartAuto()}
@@ -143,16 +215,4 @@ $('#sort').onchange=()=>refresh();
 $('#q').addEventListener('input',()=>{clearTimeout(window._qt);window._qt=setTimeout(()=>refresh(),300)});
 $('#q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();refresh();$('#searchOv').classList.remove('show');document.getElementById('katalog').scrollIntoView()}});
 $('#wishBtn').onclick=()=>{if(!wish.size)return toast('Sevimlilar bo‘sh — ♡ bosing');const list=ALL.filter(p=>wish.has(p.slug));$('#grid').innerHTML=list.map(card).join('');bindCards();document.getElementById('katalog').scrollIntoView({behavior:'smooth'})};
-$('#sendOrder').onclick=()=>{
-  const name=$('#fName').value.trim(),phone=$('#fPhone').value.trim(),addr=$('#fAddr').value.trim(),com=$('#fCom').value.trim();
-  const items=cartItems();
-  if(name.length<2)return toast('Ismingizni yozing');if(phone.length<7)return toast('Telefonni yozing');if(addr.length<5)return toast('Manzilni yozing');if(!items.length)return toast('Savat bo‘sh');
-  const sub=items.reduce((a,i)=>a+i.price*i.qty,0);
-  const lines=items.map(i=>`• ${i.name} — ${i.qty} dona — ${fmt(i.price*i.qty)}`).join('\n');
-  const msg=`🌷 AZA FLOWERS — yangi buyurtma (sayt)\n👤 ${name}\n📞 ${phone}\n📍 ${addr}\n💬 ${com||'-'}\n\n${lines}\n\nJami: ${fmt(sub)}\nYetkazish: Yandex alohida`;
-  try{navigator.clipboard.writeText(msg).catch(()=>{})}catch(e){}
-  window.open((CFG.contact&&CFG.contact.telegram)||'https://t.me/azaflowers','_blank');
-  cart={};localStorage.setItem('aza_cart','{}');renderCart();closeModal('#cmodal');
-  toast('Buyurtma matni nusxalandi — Telegramda yuboring 🌷');
-};
 load().then(()=>{renderCart();paintWish()}).catch(()=>toast("Ma'lumot yuklanmadi"));

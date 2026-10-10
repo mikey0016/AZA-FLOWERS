@@ -4,8 +4,9 @@
   --accent:#9bb8e0; --accent-dark:#8ca6ca; --accent-bg:#d5e4fa;
   --sale:#ed6363; --new:#adc4e6; --star:#ffbb54; --imgbg:#f7f7f7;
   --footer:#072033; --runline:#faebf0;
-  --sans:"Jost","Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --sans:"Roboto","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
   --serif:"Roboto Slab",Georgia,"Times New Roman",serif;
+  --disp:"Jost","Roboto","Segoe UI",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -37,7 +38,7 @@ img{max-width:100%}
 .logo .t b{font-size:24px;font-weight:600;letter-spacing:4px;display:block}
 .logo .t small{font-size:9.5px;letter-spacing:2.6px;color:var(--muted);font-weight:500}
 .c-top-menu{display:flex;gap:26px;justify-content:center;flex:1}
-.c-top-menu a{font-size:13px;font-weight:500;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink);white-space:nowrap;position:relative;padding:6px 0}
+.c-top-menu a{font-size:13px;font-weight:500;font-family:var(--disp);letter-spacing:1.4px;text-transform:uppercase;color:var(--ink);white-space:nowrap;position:relative;padding:6px 0}
 .c-top-menu a:hover{color:var(--accent-dark)}
 .c-top-menu a.sale{color:var(--sale)}
 .hicons{display:flex;align-items:center;gap:4px;flex:none}
@@ -74,7 +75,7 @@ img{max-width:100%}
 .slide h1 em{font-style:normal;color:var(--accent-dark)}
 .slide .sub{color:var(--body);font-size:16px;max-width:52ch}
 .slide .cta{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap}
-.btn{border:0;cursor:pointer;padding:15px 38px;font-weight:500;font-size:13px;letter-spacing:1.6px;text-transform:uppercase;display:inline-block;transition:.25s;font-family:var(--sans)}
+.btn{border:0;cursor:pointer;padding:15px 38px;font-weight:500;font-size:13px;letter-spacing:1.6px;text-transform:uppercase;display:inline-block;transition:.25s;font-family:var(--disp)}
 .btn-acc{background:var(--accent);color:#fff}
 .btn-acc:hover{background:var(--ink)}
 .btn-outline{background:transparent;border:1px solid var(--ink);color:var(--ink)}
@@ -114,7 +115,7 @@ img{max-width:100%}
 
 /* tabs */
 .tabs{display:flex;gap:34px;justify-content:center;border-bottom:1px solid var(--line);margin-bottom:34px}
-.tabbtn{border:0;background:none;cursor:pointer;font-size:13px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);padding:12px 2px;position:relative;font-family:var(--sans)}
+.tabbtn{border:0;background:none;cursor:pointer;font-size:13px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted);padding:12px 2px;position:relative;font-family:var(--disp)}
 .tabbtn.on{color:var(--ink)}
 .tabbtn.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink)}
 
@@ -132,11 +133,11 @@ img{max-width:100%}
 .wish{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:16px;z-index:2;opacity:0;transition:.25s;color:var(--ink)}
 .card:hover .wish{opacity:1}
 .wish.on{opacity:1;background:var(--sale);border-color:var(--sale);color:#fff}
-.quick{position:absolute;left:0;right:0;bottom:0;background:rgba(24,24,24,.92);color:#fff;border:0;cursor:pointer;font-size:12px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;padding:13px;transform:translateY(100%);transition:.28s;font-family:var(--sans);z-index:2}
+.quick{position:absolute;left:0;right:0;bottom:0;background:rgba(24,24,24,.92);color:#fff;border:0;cursor:pointer;font-size:12px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;padding:13px;transform:translateY(100%);transition:.28s;font-family:var(--disp);z-index:2}
 .card:hover .quick{transform:none}
 .quick:hover{background:var(--accent)}
 .pbody{padding:16px 4px 0;text-align:left;display:flex;flex-direction:column;gap:6px;flex:1}
-.cat{font-size:12px;color:var(--accent-dark);font-weight:500;letter-spacing:1.4px;text-transform:uppercase}
+.cat{font-size:12px;color:var(--accent-dark);font-weight:500;font-family:var(--disp);letter-spacing:1.4px;text-transform:uppercase}
 .name{font-size:20px;font-weight:300;cursor:pointer;line-height:1.35}
 .name:hover{color:var(--accent-dark)}
 .stars{color:var(--star);font-size:13px;letter-spacing:2px}
@@ -145,7 +146,7 @@ img{max-width:100%}
 .prow{display:flex;align-items:baseline;gap:10px}
 .price{font-weight:300;font-size:19px}
 .old{color:var(--light);text-decoration:line-through;font-size:14px;font-weight:300}
-.add{margin-top:8px;width:100%;border:1px solid var(--ink);background:#fff;color:var(--ink);padding:12px;font-weight:500;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;transition:.2s;font-family:var(--sans)}
+.add{margin-top:8px;width:100%;border:1px solid var(--ink);background:#fff;color:var(--ink);padding:12px;font-weight:500;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;cursor:pointer;transition:.2s;font-family:var(--disp)}
 .add:hover{background:var(--ink);color:#fff}
 .add:disabled{opacity:.35;cursor:not-allowed}
 
@@ -277,3 +278,43 @@ footer{background:var(--footer);color:#fff;margin-top:40px}
   .quick{transform:none;position:static;margin-top:8px}
   .wish{opacity:1}
 }
+/* Ciello: UI yozuvlar Jost da */
+.pill,select.sort,.topbar,.price,.logo .t b,.eyebrow,.perk b,.fh,.toast,.tab,.count,.banner .tx .go,.stars,.form input,.form textarea,.form select,.st,.iconbtn .n,.mmenu a{font-family:var(--disp)}
+.price{font-weight:400}
+.name{font-weight:300}
+/* SAMA uslubidagi checkout forma */
+.cform{display:grid;gap:22px}
+.cform h3{font-family:var(--serif);font-weight:400;font-size:21px;margin:0 0 4px}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fld{display:grid;gap:6px;font-size:13px;color:var(--body)}
+.fld.full{grid-column:1/-1}
+.fld span{font-weight:500;letter-spacing:.4px}
+.fld input,.fld select,.fld textarea{border:1px solid var(--line);padding:12px 14px;font-size:14px;outline:0;width:100%;font-family:var(--sans);background:#fff;color:var(--ink);border-radius:0}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--ink)}
+.radio-cards{display:grid;gap:10px}
+.radio-card{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);padding:13px 15px;cursor:pointer;transition:.2s;background:#fff}
+.radio-card:hover{border-color:var(--ink)}
+.radio-card:has(input:checked){border-color:var(--ink);background:#fbfbfd;box-shadow:inset 0 0 0 1px var(--ink)}
+.radio-card input{margin-top:4px;accent-color:var(--ink)}
+.radio-card b{display:block;font-size:14.5px;font-weight:500;font-family:var(--disp);letter-spacing:.4px}
+.radio-card small{color:var(--muted);font-size:13px}
+.prepay{border:1px solid var(--accent-dark);background:#f6f9ff;padding:16px}
+.prepay .pl{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--accent-dark);font-family:var(--disp);font-weight:600}
+.prepay .big{font-family:var(--serif);font-size:32px;margin:4px 0}
+.prepay .rest{font-size:13.5px;color:var(--body)}
+.prepay .cardn{margin-top:10px;font-size:14px}
+.prepay .cardn code{background:#fff;border:1px dashed var(--accent-dark);padding:6px 12px;font-size:16px;letter-spacing:1px;cursor:pointer}
+.promo-row{display:flex;gap:8px}
+.promo-row input{flex:1;border:1px solid var(--line);padding:12px 14px;font-size:14px;outline:0;font-family:var(--sans)}
+.promo-msg{font-size:13px;min-height:20px}
+.promo-msg.ok{color:#2e7d32}.promo-msg.err{color:var(--sale)}
+.sumrow{display:flex;justify-content:space-between;font-size:14px;color:var(--body);padding:5px 0}
+.sumrow b{color:var(--ink);font-weight:500}
+.sumrow.total{font-size:17px;border-top:1px solid var(--line);margin-top:6px;padding-top:12px}
+.sumrow.total b{font-weight:600}
+.sumrow.pre b{color:var(--accent-dark);font-weight:600}
+.paybadges{display:flex;gap:8px;flex-wrap:wrap}
+.paybadges span{border:1px solid rgba(255,255,255,.35);padding:5px 12px;font-size:11px;letter-spacing:1.5px;font-family:var(--disp);font-weight:600}
+.paycards{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.paycards span{border:1px solid var(--line);padding:5px 12px;font-size:11px;letter-spacing:1.5px;font-family:var(--disp);font-weight:600;color:var(--ink)}
+@media(max-width:640px){.fgrid2{grid-template-columns:1fr}}

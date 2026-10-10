@@ -141,7 +141,148 @@ window.closeModal=closeModal;
 function openDrawer(){$('#drawer').classList.add('show');$('#overlay').classList.add('show');renderCart()}
 function closeDrawer(){$('#drawer').classList.remove('show');$('#overlay').classList.remove('show')}
 window.closeDrawer=closeDrawer;
-window.openCheckout=()=>{const items=cartItems();if(!items.length)return;const sub=items.reduce((a,i)=>a+i.price*i.qty,0);if(ME){if(!$('#fName').value)$('#fName').value=ME.name;if(!$('#fPhone').value)$('#fPhone').value='+'+ME.phone}$('#sumLine').textContent=`${items.length} tur • Gullar: ${fmt(sub)}. Yetkazish Yandex'ga alohida to'lanadi.`;closeDrawer();openModal('#cmodal')};
+/* SAMA uslubidagi checkout: manzil + yetkazish + to'lov + prepay + promokod */
+const CO={ship:'standard',pay:'cash',promo:{code:'',pct:0}};
+const SHIP_LABEL={standard:'Standart (Yandex, 3 soat)',express:'Tezkor (1 soat)'};
+const PAY_LABEL={cash:"Naqd / yetkazib berishda",card:'Plastik karta (terminal)',online:"Online to'lov (Click / Payme)"};
+function shipFee(){const s=(CFG.ship||[]).find(x=>x.slug===CO.ship);return s?s.fee:(CO.ship==='express'?30000:0)}
+function coTotals(){
+  const items=cartItems();
+  const sub=items.reduce((a,i)=>a+i.price*i.qty,0);
+  const disc=Math.round(sub*CO.promo.pct/100);
+  const ship=shipFee();
+  const total=sub-disc+ship;
+  const prepay=Math.round(total*(CFG.prepay_pct||50)/100);
+  return {items,sub,disc,ship,total,prepay,rest:total-prepay};
+}
+window.openCheckout=()=>{
+  if(!cartItems().length)return;
+  CO.ship='standard';CO.pay='cash';CO.promo={code:'',pct:0};
+  renderCheckout();closeDrawer();openModal('#cmodal');
+};
+function renderCheckout(){
+  const t=coTotals();
+  const regions=CFG.regions||['Toshkent shahri'];
+  const ships=CFG.ship||[{slug:'standard',name:'Standart',hint:"Yandex orqali 3 soatgacha · alohida to'lanadi"},{slug:'express',name:'Tezkor',hint:'1 soatda · +30 000 so‘m'}];
+  const card=CFG.pay_card||'';
+  $('#coBody').innerHTML=`
+  <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtmani rasmiylashtirish</h2>
+  <p style="color:var(--muted);font-size:13.5px">Buyurtma uchun <b>50% oldindan to'lov</b> qilinadi.</p>
+  <div class="cform" style="margin-top:14px">
+    <div><h3>Aloqa ma'lumotlari</h3><div class="fgrid2" style="margin-top:10px">
+      <label class="fld"><span>Ism *</span><input id="fName" value="${ME?ME.name.split(' ')[0]:''}"></label>
+      <label class="fld"><span>Telefon *</span><input id="fPhone" placeholder="+998 __ ___ __ __" value="${ME?('+'+ME.phone):''}"></label>
+    </div></div>
+    <div><h3>Yetkazib berish manzili</h3><div class="fgrid2" style="margin-top:10px">
+      <label class="fld"><span>Hudud *</span><select id="fRegion">${regions.map(r=>`<option>${r}</option>`).join('')}</select></label>
+      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" placeholder="Masalan: Chilonzor"></label>
+      <label class="fld full"><span>Manzil (ko'cha, uy) *</span><input id="fAddr" placeholder="Masalan: Bunyodkor shoh ko'chasi 12"></label>
+      <label class="fld full"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, tabriknoma matni..."></label>
+    </div></div>
+    <div><h3>Yetkazish usuli</h3><div class="radio-cards" style="margin-top:10px" id="coShip">
+      ${ships.map(s=>`<label class="radio-card"><input type="radio" name="ship" value="${s.slug}" ${CO.ship===s.slug?'checked':''}><span><b>${s.name}</b><small>${s.hint}</small></span></label>`).join('')}
+    </div></div>
+    <div><h3>To'lov usuli</h3><div class="radio-cards" style="margin-top:10px" id="coPay">
+      <label class="radio-card"><input type="radio" name="pay" value="cash" checked><span><b>Naqd / yetkazib berishda</b><small>Kuryerga naqd to'lov</small></span></label>
+      <label class="radio-card"><input type="radio" name="pay" value="card"><span><b>Plastik karta</b><small>Yetkazib berishda terminal</small></span></label>
+      <label class="radio-card"><input type="radio" name="pay" value="online"><span><b>Online to'lov</b><small>Payme / Click</small></span></label>
+    </div></div>
+    <div class="prepay" id="coPrepay"></div>
+    <div><h3>Promokod (% li chegirma)</h3>
+      <div class="promo-row" style="margin-top:10px"><input id="promoInput" placeholder="Promokodni kiriting"><button class="btn btn-outline" id="promoBtn" style="padding:12px 22px">Qo'llash</button></div>
+      <p class="promo-msg" id="promoMsg"></p>
+    </div>
+    <div id="coSummary"></div>
+    <button class="btn btn-acc" id="sendOrder" style="width:100%">Buyurtmani tasdiqlash →</button>
+    <p class="hint">🔒 Ma'lumotlaringiz xavfsiz saqlanadi</p>
+  </div>`;
+  document.querySelectorAll('#coShip input').forEach(r=>r.onchange=()=>{CO.ship=r.value;refreshCo()});
+  document.querySelectorAll('#coPay input').forEach(r=>r.onchange=()=>{CO.pay=r.value});
+  $('#promoBtn').onclick=applyPromo;
+  $('#sendOrder').onclick=submitOrder;
+  refreshCo();
+}
+function refreshCo(){
+  const t=coTotals();
+  const pct=CFG.prepay_pct||50;
+  const card=CFG.pay_card||'';
+  $('#coPrepay').innerHTML=`<span class="pl">Oldindan to'lov · ${pct}%</span><div class="big">${fmt(t.prepay)}</div>
+  <div class="rest">Qolgan <b>${fmt(t.rest)}</b> yetkazib berishda to'lanadi</div>
+  <div class="cardn">${card?`💳 To'lov kartasi (Click / Payme):<br><code id="payCardNum">${card}</code><br><small>To'lov chekini saqlang — operator tasdiqlaydi.</small>`:`💳 To'lov kartasi: operatorimiz sizga shu chat orqali yuboradi.`}</div>`;
+  const pc=$('#payCardNum');if(pc)pc.onclick=()=>{try{navigator.clipboard.writeText(card);toast('Karta nusxalandi')}catch(e){}};
+  $('#coSummary').innerHTML=t.items.map(i=>`<div class="sumrow"><span>${i.name} × ${i.qty}</span><b>${fmt(i.price*i.qty)}</b></div>`).join('')
+    +`<div class="sumrow"><span>Mahsulotlar</span><b>${fmt(t.sub)}</b></div>`
+    +(t.disc?`<div class="sumrow"><span>Promokod ${CO.promo.code} (−${CO.promo.pct}%)</span><b>−${fmt(t.disc)}</b></div>`:'')
+    +`<div class="sumrow"><span>Yetkazish (${SHIP_LABEL[CO.ship]||CO.ship})</span><b>${t.ship?fmt(t.ship):"Yandex alohida"}</b></div>`
+    +`<div class="sumrow total"><span>Jami</span><b>${fmt(t.total)}</b></div>`
+    +`<div class="sumrow pre"><span>Oldindan ${pct}%</span><b>${fmt(t.prepay)}</b></div>`;
+}
+async function applyPromo(){
+  const inp=$('#promoInput'),msg=$('#promoMsg');
+  const code=(inp.value||'').trim().toUpperCase();
+  if(!code){CO.promo={code:'',pct:0};msg.textContent='';msg.className='promo-msg';refreshCo();return}
+  msg.textContent='Tekshirilmoqda...';msg.className='promo-msg';
+  try{
+    const r=await fetch('/api/promo?code='+encodeURIComponent(code));
+    const j=await r.json();
+    if(j.ok){CO.promo={code:j.code,pct:j.pct};msg.textContent=`✅ ${j.pct}% chegirma qo'llandi!`;msg.className='promo-msg ok'}
+    else{CO.promo={code:'',pct:0};msg.textContent='⛔ '+(j.error||'topilmadi');msg.className='promo-msg err'}
+  }catch(e){msg.textContent='⛔ Tekshirib bo‘lmadi';msg.className='promo-msg err'}
+  refreshCo();
+}
+async function submitOrder(){
+  const body={name:$('#fName').value.trim(),phone:$('#fPhone').value.trim(),
+    region:$('#fRegion').value,city:$('#fCity').value.trim(),address:$('#fAddr').value.trim(),
+    note:$('#fNote').value.trim(),ship:CO.ship,pay:CO.pay,promo:CO.promo.code,
+    items:cartItems().map(i=>({slug:i.slug,qty:i.qty}))};
+  if(body.name.length<2)return toast('Ismingizni yozing');
+  if(body.phone.replace(/\D/g,'').length<9)return toast('Telefonni to‘g‘ri kiriting');
+  if(body.city.length<2)return toast('Tuman / shaharni yozing');
+  if(body.address.length<5)return toast('Manzilni yozing');
+  if(!body.items.length)return toast('Savat bo‘sh');
+  try{
+    const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)});
+    const o=await r.json();
+    if(!r.ok)return toast('Xatolik: '+(o.detail||'qayta urining'));
+    cart={};localStorage.setItem('aza_cart','{}');renderCart();
+    showSuccess(o,body);
+  }catch(e){toast('Xatolik — internetni tekshiring')}
+}
+function showSuccess(o,form){
+  const botUrl=o.bot_url||'https://t.me/azaflowers';
+  $('#coBody').innerHTML=`<div style="text-align:center;padding:10px 0">
+    <div style="font-size:52px">✓</div>
+    <h2 style="font-family:var(--serif);font-weight:400;font-size:30px;margin:8px 0">Buyurtmangiz qabul qilindi!</h2>
+    <p style="color:var(--body)">Rahmat, <b>${form.name}</b>. Buyurtma raqami: <b>${o.no||('#'+o.order_id)}</b></p>
+    <div style="text-align:left;border:1px solid var(--line);padding:16px;margin:16px 0">
+      <div class="sumrow"><span>Manzil</span><b>${[form.region,form.city,form.address].filter(Boolean).join(', ')}</b></div>
+      <div class="sumrow"><span>To'lov</span><b>${PAY_LABEL[form.pay]||form.pay}</b></div>
+      ${form.promo?`<div class="sumrow"><span>Promokod</span><b>${form.promo}</b></div>`:''}
+      <div class="sumrow total"><span>Jami</span><b>${fmt(o.total)}</b></div>
+      <div class="sumrow pre"><span>Oldindan to'lov</span><b>${fmt(o.prepay)}</b></div>
+    </div>
+    <div id="coStatus"></div>
+    <h3 style="font-family:var(--serif);font-weight:400;font-size:22px;margin:14px 0 6px">Keyingi qadam — to'lov 💳</h3>
+    <p style="color:var(--body);font-size:14px"><b>${fmt(o.prepay)}</b> ni to'lang va chekni botga yuboring.</p>
+    <a class="btn btn-acc" style="width:100%;margin-top:8px" target="_blank" href="${botUrl}">✈ Botga o'tish va chek yuborish</a>
+    <p class="hint">⚠️ Aynan <b>${fmt(o.prepay)}</b> to'lang — ko'p ham, kam ham emas.</p>
+  </div>`;
+  pollOrder(o.id||o.order_id,0);
+}
+async function pollOrder(oid,n){
+  if(n>60||!document.getElementById('coStatus'))return;
+  try{
+    const r=await fetch('/api/order?id='+oid);
+    if(!r.ok)return;
+    const j=await r.json();
+    const box=document.getElementById('coStatus');if(!box)return;
+    const st=j.status;
+    if(st==='awaiting_confirm')box.innerHTML=`<div class="prepay" style="margin-top:10px"><b>📸 Chek qabul qilindi!</b><br><span style="font-size:13.5px">Admin tekshirmoqda...</span></div>`;
+    else if(['accepted','qabul','preparing','delivering'].includes(st)){box.innerHTML=`<div class="prepay" style="margin-top:10px"><b>✓ Buyurtma qabul qilindi, rahmat! 🎉</b><br><span style="font-size:13.5px">To'lovingiz tasdiqlandi.</span></div>`;return}
+    else if(['rejected','cancelled'].includes(st)){box.innerHTML=`<div class="prepay" style="margin-top:10px;border-color:var(--sale)"><b>❌ Buyurtma tasdiqlanmadi</b><br><span style="font-size:13.5px">Chekda muammo — qayta urinib ko'ring.</span></div>`;return}
+  }catch(e){}
+  setTimeout(()=>pollOrder(oid,n+1),5000);
+}
 
 /* slider */
 let curSlide=0,slideTimer=null;
@@ -186,14 +327,7 @@ $('#wishBtn').onclick=()=>{
 };
 $('#fWish').onclick=e=>{e.preventDefault();$('#wishBtn').click()};
 $('#fCart').onclick=e=>{e.preventDefault();openDrawer()};
-$('#sendOrder').onclick=async()=>{
-  const body={name:$('#fName').value.trim(),phone:$('#fPhone').value.trim(),address:$('#fAddr').value.trim(),comment:$('#fCom').value.trim(),items:cartItems().map(i=>({slug:i.slug,qty:i.qty}))};
-  if(body.name.length<2)return toast('Ismingizni yozing');if(body.phone.length<7)return toast('Telefonni yozing');if(body.address.length<5)return toast('Manzilni yozing');if(!body.items.length)return toast('Savat bo‘sh');
-  const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)});
-  if(!r.ok){const e=await r.json();return toast('Xatolik: '+e.detail)}const o=await r.json();
-  cart={};localStorage.setItem('aza_cart','{}');renderCart();closeModal('#cmodal');
-  toast(`Rahmat! Buyurtma #${o.order_id} qabul qilindi. Jami: ${fmt(o.total)}`);
-};
+/* sendOrder endi renderCheckout ichida bind qilinadi (SAMA uslubi) */
 load().then(async()=>{await loadMe();paintAuth();renderCart();paintWish()});
 document.getElementById('tabLogin').onclick=()=>switchTab('login');
 document.getElementById('tabReg').onclick=()=>switchTab('reg');

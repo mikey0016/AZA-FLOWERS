@@ -21,17 +21,26 @@ from app import store as pstore
 
 log = logging.getLogger("aza.bot")
 
-MENU = [["🧾 So'nggi buyurtmalar", "📊 Bugungi hisobot"], ["🌷 Mahsulotlar", "📦 Qoldiqlar"], ["ℹ️ Yordam"]]
+MENU = [["🧾 So'nggi buyurtmalar", "📊 Bugungi hisobot"], ["🌷 Mahsulotlar", "📦 Qoldiqlar"], ["🎟 Promokodlar", "💳 Karta"], ["ℹ️ Yordam"]]
 
 HELP = (
     "ℹ️ <b>AZA FLOWERS — admin panel</b>\n\n"
     "🧾 <b>So'nggi buyurtmalar</b> — oxirgi buyurtmalar ro'yxati\n"
     "📊 <b>Bugungi hisobot</b> — bugungi son va summa\n"
     "📦 <b>Qoldiqlar</b> — ombordagi mahsulotlar soni\n"
-    "🌷 <b>Mahsulotlar</b> — yangi gul qo'shish, narx/qoldiq/tavsif tahrirlash\n\n"
-    "Saytdan tushgan har bir buyurtma shu yerga keladi. "
-    "Xabardagi <b>✅ Qabul qildim</b> tugmasini bossangiz, "
-    "buyurtma qabul qilingan deb belgilanadi."
+    "🌷 <b>Mahsulotlar</b> — yangi gul qo'shish, narx/qoldiq/tavsif tahrirlash\n"
+    "🎟 <b>Promokodlar</b> — chegirma kodlari ro'yxati\n"
+    "💳 <b>Karta</b> — to'lov kartasi raqami\n\n"
+    "Buyruqlar:\n"
+    "/orders — buyurtmalar (tugmalar bilan)\n"
+    "/stats — statistika\n"
+    "/promo_add KOD FOIZ [SONI] — masalan: <code>/promo_add NAVROZ10 10 50</code>\n"
+    "/promo_list — promokodlar\n"
+    "/promo_del KOD — o'chirish\n"
+    "/setcard 8600123456789012 — to'lov kartasi\n"
+    "/card — hozirgi karta\n\n"
+    "Saytdan tushgan buyurtma chek yuborilgach shu yerga keladi. "
+    "<b>✅ Chekni tasdiqlash</b> yoki <b>❌ Rad etish</b> tugmasini bosing."
 )
 
 
@@ -184,8 +193,15 @@ def handle_message(base: Path, msg: dict) -> None:
     if msg.get("photo"):
         if handle_photo(base, cid, msg):
             return
+        if handle_check(base, cid, msg):
+            return
     if not is_admin(base, cid, username):
-        reply(base, cid, "⛔ Bu bot faqat AZA FLOWERS adminlari uchun.")
+        if text.startswith("/start"):
+            arg = text.split()[1] if len(text.split()) > 1 else ""
+            if arg.startswith("ord_"):
+                handle_user_start(base, cid, arg[4:])
+                return
+        reply(base, cid, "⛔ Bu bot faqat AZA FLOWERS adminlari uchun.\nBuyurtma uchun saytdan foydalaning: azaflowers.uz")
         return
     if ensure_admin(base, cid, username):
         reply(base, cid, "✅ Admin sifatida ulandingiz! Buyurtmalar shu yerga keladi.", menu=True)
@@ -193,6 +209,10 @@ def handle_message(base: Path, msg: dict) -> None:
     if handle_pending(base, cid, text):
         return
     if text.startswith("/start"):
+        arg = text.split()[1] if len(text.split()) > 1 else ""
+        if arg.startswith("ord_"):
+            handle_user_start(base, cid, arg[4:])
+            return
         reply(base, cid, "👋 <b>AZA FLOWERS admin panel</b>\nQuyidagi tugmalardan birini tanlang:", menu=True)
     elif text == "🌷 Mahsulotlar" or text == "/mahsulotlar":
         send_product_list(base, cid)
@@ -205,6 +225,32 @@ def handle_message(base: Path, msg: dict) -> None:
         reply(base, cid, today_text(base))
     elif text == "📦 Qoldiqlar":
         reply(base, cid, stock_text(base))
+    elif text == "🎟 Promokodlar" or text == "/promo_list":
+        reply(base, cid, promo_list_text(base))
+    elif text == "💳 Karta" or text == "/card":
+        reply(base, cid, card_text(base))
+    elif text == "/orders":
+        send_orders_list(base, cid, "pending", 0)
+    elif text == "/stats":
+        reply(base, cid, stats_text(base))
+    elif text.startswith("/promo_add"):
+        reply(base, cid, promo_add_cmd(base, text))
+    elif text.startswith("/promo_del"):
+        parts = text.split()
+        if len(parts) < 2:
+            reply(base, cid, "Format: <code>/promo_del KOD</code>")
+        else:
+            from app import payments as paymod
+            ok = paymod.del_promo(base, parts[1])
+            reply(base, cid, "✅ O'chirildi." if ok else "❌ Topilmadi.")
+    elif text.startswith("/setcard"):
+        card = text.replace("/setcard", "").strip().replace(" ", "")
+        if len(card) < 12:
+            reply(base, cid, "Format: <code>/setcard 8600123456789012</code>")
+        else:
+            from app import payments as paymod
+            paymod.set_payment(base, pay_card=card)
+            reply(base, cid, f"✅ Karta saqlandi:\n<code>{_h.escape(card)}</code>")
     elif text in ("ℹ️ Yordam", "/help"):
         reply(base, cid, HELP)
     elif text:
@@ -266,6 +312,8 @@ def dispatch(base: Path, update: dict) -> None:
         d = cb.get("data", "")
         if d == "plist" or d.startswith("p:") or d.startswith("e:") or d in ("add_new", "add_ok", "add_no") or d.startswith("c:"):
             handle_product_callback(base, cb)
+        elif d.startswith("order:") or d.startswith("olist:") or d.startswith("view:") or d in ("stats", "promos", "ocard") or d.startswith("promo_del:"):
+            handle_order_callback(base, cb)
         else:
             handle_callback(base, cb)
 
@@ -610,3 +658,391 @@ def handle_photo(base: Path, cid: int, msg: dict) -> bool:
         st["step"] = "confirm"
         return True
     return False
+
+
+# --- buyurtma statuslari (SAMA uslubida) ---
+STATUS = {
+    "yangi": "🆕 Yangi",
+    "qabul": "✅ Qabul qilindi",
+    "awaiting_payment": "⏳ To'lov kutilmoqda",
+    "awaiting_confirm": "🔎 Chek tekshirilmoqda",
+    "accepted": "✅ Qabul qilindi",
+    "preparing": "🟡 Tayyorlanmoqda",
+    "delivering": "🚚 Yo'lda",
+    "delivered": "🏁 Yetkazildi",
+    "closed": "🎉 Yakunlandi",
+    "cancelled": "❌ Bekor qilindi",
+    "rejected": "⛔ Rad etildi",
+}
+
+FILTERS = {
+    "pending": ("Kutilmoqda", ["yangi", "awaiting_payment", "awaiting_confirm"]),
+    "accepted": ("Qabul qilingan", ["qabul", "accepted", "preparing", "delivering", "delivered", "closed"]),
+    "rejected": ("Rad etilgan", ["cancelled", "rejected"]),
+    "all": ("Barchasi", None),
+}
+PAGE_SIZE = 5
+
+USER_NOTIFY = {
+    "accepted": "✅ To'lovingiz tasdiqlandi! Buyurtmangiz tayyorlanmoqda 🌷",
+    "rejected": "❌ Buyurtmangiz rad etildi. Chekda muammo bo'lsa, qayta yuboring.",
+    "preparing": "🟡 Buyurtmangiz tayyorlanmoqda 🌷",
+    "delivering": "🚚 Buyurtmangiz yo'lda! Kuryer tez orada yetkazadi.",
+    "delivered": "📦 Buyurtma yetkazildi! Qabul qilganingizni tasdiqlang 👇",
+    "cancelled": "❌ Buyurtmangiz bekor qilindi.",
+}
+
+
+def st_label(s: str) -> str:
+    return STATUS.get(s, s)
+
+
+def order_keyboard(o: dict):
+    st = o.get("status", "yangi")
+    oid = o["id"]
+    if st in ("delivered", "closed", "cancelled", "rejected"):
+        return None
+    if st == "awaiting_confirm":
+        return {"inline_keyboard": [
+            [{"text": "✅ Chekni tasdiqlash", "callback_data": f"order:{oid}:accepted"},
+             {"text": "❌ Rad etish", "callback_data": f"order:{oid}:rejected"}],
+            [{"text": "📋 Ro'yxat", "callback_data": "olist:pending:0"}]]}
+    if st in ("yangi",):
+        return {"inline_keyboard": [
+            [{"text": "✅ Qabul qilish", "callback_data": f"order:{oid}:accepted"},
+             {"text": "❌ Rad etish", "callback_data": f"order:{oid}:cancelled"}],
+            [{"text": "📋 Ro'yxat", "callback_data": "olist:pending:0"}]]}
+    if st == "awaiting_payment":
+        return {"inline_keyboard": [
+            [{"text": "❌ Bekor qilish", "callback_data": f"order:{oid}:cancelled"}],
+            [{"text": "📋 Ro'yxat", "callback_data": "olist:pending:0"}]]}
+    return {"inline_keyboard": [
+        [{"text": "🟡 Tayyorlanmoqda", "callback_data": f"order:{oid}:preparing"},
+         {"text": "🚚 Yo'lda", "callback_data": f"order:{oid}:delivering"}],
+        [{"text": "🏁 Yetkazildi", "callback_data": f"order:{oid}:delivered"},
+         {"text": "❌ Bekor", "callback_data": f"order:{oid}:cancelled"}],
+        [{"text": "📋 Ro'yxat", "callback_data": "olist:pending:0"}]]}
+
+
+def refresh_order_msgs(base: Path, o: dict) -> None:
+    from app.telegram import order_text as _ot
+    kb = order_keyboard(o)
+    for m in o.get("msgs", []) or []:
+        try:
+            tg.call_api(base, "editMessageText", {
+                "chat_id": m["chat"], "message_id": m["msg"],
+                "text": f"{_ot(o)}\n\nHolati: {st_label(o.get('status', ''))}",
+                "parse_mode": "HTML",
+                **({"reply_markup": json.dumps(kb)} if kb else {}),
+            }, timeout=15)
+        except Exception as e:
+            log.warning("refresh xatosi: %s", e)
+
+
+def set_status(base: Path, oid: int, status: str, by: str = "") -> dict | None:
+    orders = _orders(base)
+    o = next((x for x in orders if x.get("id") == oid), None)
+    if not o:
+        return None
+    o["status"] = status
+    if by:
+        o["accepted_by"] = by
+    _save_orders(base, orders)
+    refresh_order_msgs(base, o)
+    if o.get("tg_user") and status in USER_NOTIFY:
+        try:
+            payload: dict = {"chat_id": o["tg_user"], "text": f"📦 Buyurtma {o.get('no', '')}\n{USER_NOTIFY[status]}"}
+            if status == "delivered":
+                payload["reply_markup"] = json.dumps({"inline_keyboard": [[
+                    {"text": "✅ Qabul qildim", "callback_data": f"recv:{oid}"}]]})
+            tg.call_api(base, "sendMessage", payload, timeout=15)
+        except Exception as e:
+            log.warning("user notify xatosi: %s", e)
+    return o
+
+
+def filtered_orders(base: Path, filt: str) -> list:
+    name, statuses = FILTERS.get(filt, FILTERS["pending"])
+    orders = _orders(base)[::-1]
+    if statuses is None:
+        return orders
+    return [o for o in orders if o.get("status", "yangi") in statuses]
+
+
+def orders_list_markup(filt: str, page: int, total_pages: int) -> dict:
+    kb = [[{"text": n, "callback_data": f"olist:{f}:0"}] for f, (n, _) in
+          [("pending", FILTERS["pending"]), ("accepted", FILTERS["accepted"]),
+           ("rejected", FILTERS["rejected"]), ("all", FILTERS["all"])]]
+    nav = []
+    if page > 0:
+        nav.append({"text": "◀", "callback_data": f"olist:{filt}:{page - 1}"})
+    if page < total_pages - 1:
+        nav.append({"text": "▶", "callback_data": f"olist:{filt}:{page + 1}"})
+    if nav:
+        kb.append(nav)
+    return {"inline_keyboard": kb}
+
+
+def send_orders_list(base: Path, cid: int, filt: str = "pending", page: int = 0, edit_mid: int = 0) -> None:
+    orders = filtered_orders(base, filt)
+    pages = max(1, (len(orders) + PAGE_SIZE - 1) // PAGE_SIZE)
+    page = max(0, min(page, pages - 1))
+    chunk = orders[page * PAGE_SIZE:(page + 1) * PAGE_SIZE]
+    name = FILTERS.get(filt, FILTERS["pending"])[0]
+    out = [f"🧾 <b>Buyurtmalar — {name}</b> ({len(orders)} ta, {page + 1}/{pages})"]
+    kb_rows = []
+    for o in chunk:
+        out.append(f"{st_label(o.get('status', ''))} <b>#{o['id']}</b> — {_h.escape(o.get('name', ''))} • {_fm(o.get('total', 0))} so'm")
+        kb_rows.append([{"text": f"#{o['id']} — {o.get('name', '')[:20]}", "callback_data": f"view:{o['id']}"}])
+    if not chunk:
+        out.append("Bo'sh.")
+    kb = orders_list_markup(filt, page, pages)
+    kb["inline_keyboard"] = kb_rows + kb["inline_keyboard"]
+    if edit_mid:
+        edit_to(base, cid, edit_mid, "\n".join(out), kb)
+    else:
+        try:
+            tg.call_api(base, "sendMessage", {"chat_id": cid, "text": "\n".join(out),
+                "parse_mode": "HTML", "reply_markup": json.dumps(kb)}, timeout=15)
+        except Exception as e:
+            log.warning("olist xatosi: %s", e)
+
+
+def stats_text(base: Path) -> str:
+    orders = _orders(base)
+    t = date.today().isoformat()
+    today = [o for o in orders if str(o.get("created_at", "")).startswith(t)]
+    by_st: dict[str, int] = {}
+    for o in orders:
+        by_st[o.get("status", "yangi")] = by_st.get(o.get("status", "yangi"), 0) + 1
+    total = sum(o.get("total", 0) for o in orders if o.get("status") not in ("cancelled", "rejected"))
+    out = ["📊 <b>Statistika</b>", f"🧾 Jami: {len(orders)} ta • 💰 { _fm(total)} so'm",
+           f"📅 Bugun: {len(today)} ta"]
+    for s, n in by_st.items():
+        out.append(f"{st_label(s)}: {n}")
+    from app import payments as paymod
+    promos = paymod.list_promos(base)
+    out.append(f"🎟 Promokodlar: {len(promos)} ta")
+    return "\n".join(out)
+
+
+def promo_list_text(base: Path) -> str:
+    from app import payments as paymod
+    promos = paymod.list_promos(base)
+    if not promos:
+        return "🎟 Promokodlar yo'q.\nQo'shish: <code>/promo_add NAVROZ10 10 50</code>"
+    out = ["🎟 <b>Promokodlar:</b>"]
+    for code, p in promos.items():
+        uses = f"{p.get('used', 0)}/{p.get('max_uses') or '∞'}"
+        on = "✅" if p.get("active", 1) else "⛔"
+        out.append(f"{on} <code>{_h.escape(code)}</code> — {p.get('pct')}% • {uses}")
+    out.append("\nO'chirish: <code>/promo_del KOD</code>")
+    return "\n".join(out)
+
+
+def promo_add_cmd(base: Path, text: str) -> str:
+    parts = text.split()
+    if len(parts) < 3:
+        return "Format: <code>/promo_add KOD FOIZ [SONI]</code>\nMasalan: <code>/promo_add NAVROZ10 10 50</code>"
+    try:
+        from app import payments as paymod
+        mx = int(parts[3]) if len(parts) > 3 else 0
+        p = paymod.add_promo(base, parts[1], int(parts[2]), mx)
+        return f"✅ Saqlandi: <code>{_h.escape(p['code'])}</code> — {p['pct']}%"
+    except (ValueError, IndexError) as e:
+        return f"❌ {e}"
+
+
+def card_text(base: Path) -> str:
+    from app import payments as paymod
+    pay = paymod.get_payment(base)
+    card = pay.get("pay_card") or "—"
+    return (f"💳 <b>To'lov kartasi:</b>\n<code>{_h.escape(card)}</code>\n"
+            f"Oldindan to'lov: {pay.get('prepay_pct', 50)}%\n\n"
+            "O'zgartirish: <code>/setcard 8600123456789012</code>")
+
+
+def payment_instructions(base: Path, o: dict) -> str:
+    from app import payments as paymod
+    card = paymod.get_payment(base).get("pay_card", "")
+    card_block = f"<code>{_h.escape(card)}</code>" if card else "Karta raqamini operatorimiz yuboradi."
+    return (
+        f"🧾 Buyurtma {o.get('no', '')}\n"
+        f"💰 Jami: {_fm(o.get('total', 0))} so'm\n"
+        f"💳 Oldindan ({paymod.get_payment(base).get('prepay_pct', 50)}%): <code>{_fm(o.get('prepay', 0))}</code>\n\n"
+        f"⛔️ MUHIM: Aynan {_fm(o.get('prepay', 0))} to'lang — ko'p ham, kam ham emas.\n\n"
+        f"💳 Karta:\n{card_block}\n\n"
+        "1-qadam: To'lovni qiling\n"
+        "2-qadam: Chekni shu yerga rasm qilib yuboring 📸"
+    )
+
+
+def user_status_text(o: dict) -> str:
+    return f"📦 Buyurtma {o.get('no', '')}\n{st_label(o.get('status', ''))}\n💰 Jami: {_fm(o.get('total', 0))} so'm"
+
+
+def handle_user_start(base: Path, cid: int, oid_raw: str) -> None:
+    try:
+        oid = int(oid_raw)
+    except ValueError:
+        reply(base, cid, "👋 AZA FLOWERS 🌷\nBuyurtma uchun saytdan foydalaning: azaflowers.uz")
+        return
+    orders = _orders(base)
+    o = next((x for x in orders if x.get("id") == oid), None)
+    if not o:
+        reply(base, cid, "❌ Buyurtma topilmadi.")
+        return
+    o["tg_user"] = cid
+    _save_orders(base, orders)
+    if o.get("status") == "awaiting_payment":
+        reply(base, cid, payment_instructions(base, o))
+    else:
+        reply(base, cid, user_status_text(o))
+
+
+def handle_check(base: Path, cid: int, msg: dict) -> bool:
+    """Mijoz chek rasmini yuborsa — adminlarga forward + awaiting_confirm."""
+    if pending.get(cid):
+        return False
+    try:
+        if is_admin(base, cid, (msg.get("from") or {}).get("username", "")):
+            return False
+    except Exception:
+        pass
+    photos = msg.get("photo") or []
+    if not photos:
+        return False
+    orders = _orders(base)
+    o = next((x for x in orders[::-1]
+              if x.get("tg_user") == cid and x.get("status") == "awaiting_payment"), None)
+    if not o:
+        return False
+    file_id = photos[-1].get("file_id")
+    o["check_file"] = file_id
+    o["status"] = "awaiting_confirm"
+    _save_orders(base, orders)
+    refresh_order_msgs(base, o)
+    s = tg.load_settings(base)
+    for admin in s["admin_chat_ids"] or []:
+        try:
+            tg.call_api(base, "forwardMessage", {
+                "chat_id": admin, "from_chat_id": cid,
+                "message_id": msg.get("message_id")}, timeout=15)
+        except Exception as e:
+            log.warning("forward xatosi: %s", e)
+    from app.telegram import order_text as _ot
+    kb = order_keyboard(o)
+    sent = []
+    for admin in s["admin_chat_ids"] or []:
+        try:
+            r = tg.call_api(base, "sendMessage", {"chat_id": admin,
+                "text": f"📸 <b>Yangi chek!</b>\n\n{_ot(o)}",
+                "parse_mode": "HTML",
+                **({"reply_markup": json.dumps(kb)} if kb else {})}, timeout=15)
+            if r.get("ok"):
+                sent.append({"chat": admin, "msg": r["result"]["message_id"]})
+        except Exception as e:
+            log.warning("check notify xatosi: %s", e)
+    if sent:
+        orders = _orders(base)
+        oo = next((x for x in orders if x.get("id") == o["id"]), None)
+        if oo:
+            oo["msgs"] = (oo.get("msgs") or []) + sent
+            oo["notified"] = 1
+            _save_orders(base, orders)
+    reply(base, cid, "✅ Chek qabul qilindi!\n🔎 Admin tekshirmoqda, kuting...")
+    return True
+
+
+def handle_order_callback(base: Path, cb: dict) -> None:
+    data = cb.get("data", "")
+    msg = cb.get("message") or {}
+    cid = (msg.get("chat") or {}).get("id")
+    mid = msg.get("message_id")
+    qid = cb.get("id")
+    frm = cb.get("from", {})
+
+    def answer(t: str) -> None:
+        try:
+            tg.call_api(base, "answerCallbackQuery", {"callback_query_id": qid, "text": t}, timeout=10)
+        except Exception:
+            pass
+
+    if data.startswith("recv:"):
+        try:
+            oid = int(data.split(":")[1])
+        except ValueError:
+            answer("Xato")
+            return
+        orders = _orders(base)
+        o = next((x for x in orders if x.get("id") == oid), None)
+        if not o or o.get("tg_user") != frm.get("id") or o.get("status") != "delivered":
+            answer("Mumkin emas")
+            return
+        o["status"] = "closed"
+        _save_orders(base, orders)
+        refresh_order_msgs(base, o)
+        answer("Rahmat! 🎉")
+        return
+
+    if not is_admin(base, cid, frm.get("username", "")):
+        answer("⛔ Faqat adminlar")
+        return
+
+    if data.startswith("order:"):
+        parts = data.split(":")
+        if len(parts) != 3:
+            answer("Xato")
+            return
+        try:
+            oid = int(parts[1])
+        except ValueError:
+            answer("Xato ID")
+            return
+        username = "@" + str(frm.get("username") or frm.get("first_name", "?")).lstrip("@")
+        o = set_status(base, oid, parts[2], username)
+        if not o:
+            answer("Topilmadi")
+            return
+        answer(st_label(parts[2]))
+    elif data.startswith("olist:"):
+        parts = data.split(":")
+        filt = parts[1] if len(parts) > 1 else "pending"
+        try:
+            page = int(parts[2]) if len(parts) > 2 else 0
+        except ValueError:
+            page = 0
+        send_orders_list(base, cid, filt, page, edit_mid=mid or 0)
+        answer("Ro'yxat")
+    elif data.startswith("view:"):
+        try:
+            oid = int(data.split(":")[1])
+        except ValueError:
+            answer("Xato")
+            return
+        o = next((x for x in _orders(base) if x.get("id") == oid), None)
+        if not o:
+            answer("Topilmadi")
+            return
+        from app.telegram import order_text as _ot
+        kb = order_keyboard(o) or {"inline_keyboard": [[
+            {"text": "📋 Ro'yxat", "callback_data": "olist:pending:0"}]]}
+        edit_to(base, cid, mid, f"{_ot(o)}\n\nHolati: {st_label(o.get('status', ''))}", kb)
+        answer(f"#{oid}")
+    elif data == "stats":
+        reply(base, cid, stats_text(base))
+        answer("Statistika")
+    elif data == "promos":
+        reply(base, cid, promo_list_text(base))
+        answer("Promo")
+    elif data == "ocard":
+        reply(base, cid, card_text(base))
+        answer("Karta")
+    elif data.startswith("promo_del:"):
+        from app import payments as paymod
+        ok = paymod.del_promo(base, data.split(":", 1)[1])
+        answer("O'chirildi" if ok else "Topilmadi")
+        if ok:
+            reply(base, cid, promo_list_text(base))
+    else:
+        answer("Noma'lum buyruq")

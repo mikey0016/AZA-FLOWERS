@@ -7,8 +7,8 @@
 <meta name="theme-color" content="#FFFFFF">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Roboto+Slab:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/style.css?v=30">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Roboto:wght@300;400;500&family=Roboto+Slab:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css?v=31">
 <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
 </head>
 <body>
@@ -39,6 +39,8 @@
 <script src="/static/auth.js?v=20"></script>
 <script>
 const fmtT=n=>n.toLocaleString('uz-UZ').replace(/,/g,' ')+" so'm";
+const ST={'qabul':'Qabul qilingan','yangi':'Tayyorlanmoqda','awaiting_payment':"To'lov kutilmoqda",'awaiting_confirm':'Chek tekshirilmoqda','accepted':'Qabul qilingan','preparing':'Tayyorlanmoqda','delivering':"Yo'lda",'delivered':'Yetkazildi','closed':'Yakunlandi','cancelled':'Bekor qilindi','rejected':'Rad etildi'};
+const OKST=['qabul','accepted','preparing','delivering','delivered','closed'];
 document.getElementById('tGo').onclick=async()=>{
   const id=document.getElementById('tId').value.trim(),ph=document.getElementById('tPhone').value.trim();
   const box=document.getElementById('tRes');
@@ -48,7 +50,7 @@ document.getElementById('tGo').onclick=async()=>{
     const r=await fetch(`/api/orders/track?order_id=${encodeURIComponent(id)}&phone=${encodeURIComponent(ph)}`);
     if(!r.ok){box.innerHTML='<div class="empty">Buyurtma topilmadi — ma\'lumotlarni tekshiring</div>';return}
     const o=await r.json();
-    const st=o.status==='qabul'?'<span class="st st-ok">Qabul qilingan</span>':'<span class="st st-new">Tayyorlanmoqda</span>';
+    const st=OKST.includes(o.status)?`<span class="st st-ok">${ST[o.status]||o.status}</span>`:`<span class="st st-new">${ST[o.status]||o.status}</span>`;
     box.innerHTML=`<div class="oline"><div><b>#${o.id}</b> ${st}<div style="color:var(--muted);font-size:13px">${o.created_at} • ${o.lines.map(l=>l.name+' × '+l.qty).join(', ')}</div></div><b>${fmtT(o.total)}</b></div>`;
   }catch(e){box.innerHTML='<div class="empty">Xatolik — qayta urining</div>'}
 };

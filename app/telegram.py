@@ -90,23 +90,53 @@ def _fm(n: int) -> str:
 
 
 def order_text(o: dict) -> str:
+    no = o.get("no") or f"AZA-{o['id']}"
+    st = o.get("status", "yangi")
     parts = [
-        f"🧾 <b>Yangi buyurtma #{o['id']}</b>",
+        f"🧾 <b>Buyurtma {no} · #{o['id']}</b>",
+        f"Holati: {st}",
         f"👤 Ism: {_h.escape(o['name'])}",
         f"📞 Tel: {_h.escape(o['phone'])}",
         f"📍 Manzil: {_h.escape(o['address'])}",
     ]
+    if o.get("ship_label"):
+        parts.append(f"🚚 Yetkazish: {_h.escape(o['ship_label'])}")
+    if o.get("pay_label"):
+        parts.append(f"💳 To'lov: {_h.escape(o['pay_label'])}")
+    if o.get("note"):
+        parts.append(f"📝 Izoh: {_h.escape(o['note'])}")
     if o.get("comment"):
         parts.append(f"💬 Izoh: {_h.escape(o['comment'])}")
     parts.append("")
-    for ln in o["lines"]:
-        parts.append(f"• {_h.escape(ln['name'])} × {ln['qty']} — {_fm(ln['total'])} so'm")
+    for i, ln in enumerate(o["lines"], 1):
+        parts.append(f"{i}. {_h.escape(ln['name'])} × {ln['qty']} — {_fm(ln['total'])} so'm")
     parts += [
         "",
-        f"💰 <b>Jami: {_fm(o['total'])} so'm</b> (yetkazish Yandex'ga alohida)",
-        f"🕒 {o['created_at']}",
+        f"Mahsulotlar: {_fm(o.get('subtotal', o['total']))} so'm",
     ]
+    if o.get("discount"):
+        parts.append(f"🎟 Chegirma: −{_fm(o['discount'])} so'm")
+    parts.append(f"Yetkazish: {_fm(o.get('ship_cost', 0))} so'm" if o.get("ship_cost") else "Yetkazish: Yandex'ga alohida")
+    parts.append(f"💰 <b>Jami: {_fm(o['total'])} so'm</b>")
+    if o.get("promo"):
+        parts.append(f"🎟 Promo: <code>{_h.escape(o['promo'])}</code> (−{o.get('discount_pct', 0)}%)")
+    if o.get("prepay") is not None:
+        parts.append(f"💳 Oldindan: {_fm(o['prepay'])} so'm")
+        parts.append(f"💵 Qolgan: {_fm(o['total'] - o['prepay'])} so'm")
+    parts.append(f"🕒 {o['created_at']}")
     return "\n".join(parts)
+
+
+def order_bot_url(base: Path, oid: int) -> str:
+    """Mijoz chek yuborishi uchun bot havolasi (start=ord_ID)."""
+    try:
+        info = _api(load_settings(base)["bot_token"], "getMe", {}, timeout=10)
+        uname = (info.get("result") or {}).get("username")
+        if uname:
+            return f"https://t.me/{uname}?start=ord_{oid}"
+    except Exception as e:
+        log.warning("getMe xatosi: %s", e)
+    return f"https://t.me/azaflowers?start=ord_{oid}"
 
 
 def send_message(base: Path, chat_id: int, text: str) -> bool:
