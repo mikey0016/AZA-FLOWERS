@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import os
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -86,6 +87,19 @@ def save_order(order: dict):
 @app.get("/health")
 async def health():
     return {"ok": True}
+
+@app.get("/api/restart")
+async def api_restart(key: str = ""):
+    """pm2 orqali qayta ishga tushirish (restart.key fayli bo'lganda)."""
+    try:
+        want = (BASE_DIR / "restart.key").read_text().strip()
+    except Exception:
+        raise HTTPException(403, "yo'q")
+    if not key or key != want:
+        raise HTTPException(403, "yo'q")
+    import threading
+    threading.Timer(1.0, lambda: os._exit(0)).start()
+    return {"ok": True, "msg": "restarting"}
 
 @app.get("/api/config")
 async def config():

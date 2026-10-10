@@ -162,15 +162,15 @@ window.openCheckout=()=>{
   <p id="prepayCardLine" style="font-size:14px;color:var(--body)">💳 50% oldindan to'lov: operatorimiz sizga karta yuboradi.</p>
   <form id="orderForm" novalidate><div class="cform" style="margin-top:6px">
     <div><div class="fgrid2">
-      <label class="fld"><span>Ism Familiya *</span><input id="fName" placeholder="Ali Valiyev" value="${escA(pr.name)}"></label>
-      <label class="fld"><span>Telefon *</span><input id="fPhone" inputmode="tel" placeholder="+998 90 770 81 24" value="${escA(pr.phone)}"></label>
+      <label class="fld"><span>Ism Familiya *</span><input id="fName" name="name" autocomplete="name" placeholder="Ali Valiyev" value="${escA(pr.name)}"></label>
+      <label class="fld"><span>Telefon *</span><input id="fPhone" name="phone" autocomplete="tel" inputmode="tel" placeholder="+998 90 770 81 24" value="${escA(pr.phone)}"></label>
     </div></div>
     <div><div class="fgrid2">
-      <label class="fld"><span>Viloyat / shahar *</span><select id="fRegion">${REGIONS.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
-      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" value="${escA(pr.city)}"></label>
+      <label class="fld"><span>Viloyat / shahar *</span><select id="fRegion" name="region" autocomplete="address-level1">${REGIONS.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
+      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" name="city" autocomplete="address-level2" value="${escA(pr.city)}"></label>
     </div></div>
     <div>
-      <label class="fld"><span>Manzil (ko'cha, uy) <small style="color:var(--muted)">— xarita belgilasangiz shart emas</small></span><input id="fAddr" value="${escA(pr.address)}"></label>
+      <label class="fld"><span>Manzil (ko'cha, uy) <small style="color:var(--muted)">— xarita belgilasangiz shart emas</small></span><input id="fAddr" name="address" autocomplete="street-address" value="${escA(pr.address)}"></label>
       <div class="fld" style="margin-top:10px"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
     </div>
     <div><div class="fld"><span>To'lov usuli</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
@@ -178,7 +178,7 @@ window.openCheckout=()=>{
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="card"> Karta</label>
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="online"> Online</label>
     </div></div></div>
-    <div><label class="fld"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, lift bor" value="${escA(pr.note)}"></label></div>
+    <div><label class="fld"><span>Izoh (kuryer uchun)</span><input id="fNote" name="note" autocomplete="off" placeholder="Masalan: 2-qavat, lift bor" value="${escA(pr.note)}"></label></div>
     <div><div class="fld"><span>Yetkazish</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="ship" value="standard" checked> Standart</label>
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="ship" value="express"> Tezkor</label>
