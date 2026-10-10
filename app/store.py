@@ -110,3 +110,19 @@ def add_product(base: Path, product: dict) -> dict:
     ov["added"].append(product)
     _save_override(base, ov)
     return copy.deepcopy(product)
+
+
+def del_product(base: Path, slug: str) -> bool:
+    """Yumshoq o'chirish: seed dagi bo'lsa deleted ro'yxatga, qo'shilgan bo'lsa olib tashlanadi."""
+    ov = _load_override(base)
+    for i, p in enumerate(ov["added"]):
+        if p["slug"] == slug:
+            ov["added"].pop(i)
+            _save_override(base, ov)
+            return True
+    if any(p["slug"] == slug for p in SEED_PRODUCTS):
+        if slug not in ov["deleted"]:
+            ov["deleted"].append(slug)
+            _save_override(base, ov)
+        return True
+    return False

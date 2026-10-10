@@ -32,15 +32,27 @@ HELP = (
     "🎟 <b>Promokodlar</b> — chegirma kodlari ro'yxati\n"
     "💳 <b>Karta</b> — to'lov kartasi raqami\n\n"
     "Buyruqlar:\n"
+    "/panel — inline admin panel\n"
     "/orders — buyurtmalar (tugmalar bilan)\n"
+    "/myorders — mijoz buyurtmalari (tg bog'langan bo'lsa)\n"
     "/stats — statistika\n"
+    "/products — mahsulotlar ro'yxati\n"
+    "/delproduct SLUG — mahsulotni o'chirish\n"
     "/promo_add KOD FOIZ [SONI] — masalan: <code>/promo_add NAVROZ10 10 50</code>\n"
     "/promo_list — promokodlar\n"
     "/promo_del KOD — o'chirish\n"
     "/setcard 8600123456789012 — to'lov kartasi\n"
-    "/card — hozirgi karta\n\n"
+    "/card — hozirgi karta\n"
+    "/cancel — joriy amalni bekor qilish\n\n"
     "Saytdan tushgan buyurtma chek yuborilgach shu yerga keladi. "
     "<b>✅ Chekni tasdiqlash</b> yoki <b>❌ Rad etish</b> tugmasini bosing."
+)
+
+USER_HELP = (
+    "🌷 <b>AZA FLOWERS</b>\n\n"
+    "/myorders — mening buyurtmalarim\n"
+    "/help — yordam\n\n"
+    "Buyurtma berish: azaflowers.uz"
 )
 
 
@@ -201,6 +213,14 @@ def handle_message(base: Path, msg: dict) -> None:
             if arg.startswith("ord_"):
                 handle_user_start(base, cid, arg[4:])
                 return
+            reply(base, cid, "👋 <b>AZA FLOWERS</b> 🌷\nBuyurtmalarimni ko'rish: /myorders\nBuyurtma berish: azaflowers.uz")
+            return
+        if text.startswith("/myorders"):
+            send_myorders(base, cid)
+            return
+        if text.startswith("/help"):
+            reply(base, cid, USER_HELP)
+            return
         reply(base, cid, "⛔ Bu bot faqat AZA FLOWERS adminlari uchun.\nBuyurtma uchun saytdan foydalaning: azaflowers.uz")
         return
     if ensure_admin(base, cid, username):
@@ -214,7 +234,9 @@ def handle_message(base: Path, msg: dict) -> None:
             handle_user_start(base, cid, arg[4:])
             return
         reply(base, cid, "👋 <b>AZA FLOWERS admin panel</b>\nQuyidagi tugmalardan birini tanlang:", menu=True)
-    elif text == "🌷 Mahsulotlar" or text == "/mahsulotlar":
+        send_panel(base, cid)
+        return
+    elif text == "🌷 Mahsulotlar" or text in ("/mahsulotlar", "/products"):
         send_product_list(base, cid)
     elif text == "/add":
         pending[cid] = {"op": "add", "step": "name", "data": {}}
@@ -229,6 +251,22 @@ def handle_message(base: Path, msg: dict) -> None:
         reply(base, cid, promo_list_text(base))
     elif text == "💳 Karta" or text == "/card":
         reply(base, cid, card_text(base))
+    elif text == "/panel":
+        send_panel(base, cid)
+    elif text.startswith("/myorders"):
+        send_myorders(base, cid)
+    elif text in ("/cancel", "/bekor"):
+        if pending.pop(cid, None):
+            reply(base, cid, "❌ Bekor qilindi.")
+        else:
+            reply(base, cid, "Bekor qilinadigan amal yo'q.")
+    elif text.startswith("/delproduct") or text.startswith("/mahsulot_del"):
+        parts = text.split()
+        if len(parts) < 2:
+            reply(base, cid, "Format: <code>/delproduct SLUG</code>")
+        else:
+            ok = pstore.del_product(base, parts[1].strip())
+            reply(base, cid, "🗑 O'chirildi." if ok else "❌ Topilmadi.")
     elif text == "/orders":
         send_orders_list(base, cid, "pending", 0)
     elif text == "/stats":
@@ -310,9 +348,9 @@ def dispatch(base: Path, update: dict) -> None:
     elif "callback_query" in update:
         cb = update["callback_query"]
         d = cb.get("data", "")
-        if d == "plist" or d.startswith("p:") or d.startswith("e:") or d in ("add_new", "add_ok", "add_no") or d.startswith("c:"):
+        if d == "plist" or d.startswith("p:") or d.startswith("pdel:") or d.startswith("f:") or d.startswith("e:") or d in ("add_new", "add_ok", "add_no") or d.startswith("c:"):
             handle_product_callback(base, cb)
-        elif d.startswith("order:") or d.startswith("olist:") or d.startswith("view:") or d in ("stats", "promos", "ocard") or d.startswith("promo_del:"):
+        elif d.startswith("order:") or d.startswith("olist:") or d.startswith("view:") or d.startswith("panel:") or d in ("stats", "promos", "ocard") or d.startswith("promo_del:") or d.startswith("recv:"):
             handle_order_callback(base, cb)
         else:
             handle_callback(base, cb)
@@ -366,12 +404,21 @@ def product_detail_text(p: dict) -> str:
 def detail_markup(p: dict) -> dict:
     slug = p["slug"]
     tog = "⛔ Nofaol qilish" if p.get("active", 1) else "✅ Faol qilish"
+    feat = int(p.get("is_featured", 0) or 0)
+    feat_row = [
+        {"text": ("● " if feat == 0 else "○ ") + "Oddiy", "callback_data": f"f:{slug}:0"},
+        {"text": ("● " if feat == 1 else "○ ") + "TOP", "callback_data": f"f:{slug}:1"},
+        {"text": ("● " if feat == 2 else "○ ") + "YANGI", "callback_data": f"f:{slug}:2"},
+    ]
     return {"inline_keyboard": [
         [{"text": "💰 Narx", "callback_data": f"e:price:{slug}"},
          {"text": "📦 Qoldiq", "callback_data": f"e:stock:{slug}"}],
-        [{"text": "✏️ Tavsif", "callback_data": f"e:desc:{slug}"},
-         {"text": "🖼 Rasm", "callback_data": f"e:photo:{slug}"}],
-        [{"text": tog, "callback_data": f"e:toggle:{slug}"}],
+        [{"text": "💲 Eski narx", "callback_data": f"e:old:{slug}"},
+         {"text": "✏️ Tavsif", "callback_data": f"e:desc:{slug}"}],
+        [{"text": "🖼 Rasm", "callback_data": f"e:photo:{slug}"},
+         {"text": tog, "callback_data": f"e:toggle:{slug}"}],
+        feat_row,
+        [{"text": "🗑 O'chirish", "callback_data": f"pdel:{slug}"}],
         [{"text": "« Mahsulotlar", "callback_data": "plist"}]]}
 
 
@@ -446,16 +493,52 @@ def handle_product_callback(base: Path, cb: dict) -> None:
         else:
             pending[cid] = {"op": "set_" + field, "slug": slug}
             prompts = {"price": "💰 Yangi narxni so'mda yuboring:",
+                       "old": "💲 Eski narxni so'mda yuboring (chegirma bo'lmasa 0):",
                        "stock": "📦 Yangi qoldiq sonini yuboring:",
                        "desc": "✏️ Yangi tavsifni yuboring:",
-                       "photo": "🖼 Gul rasmini foto ko'rinishida yuboring:"}
+                       "photo": "🖼 Gul rasmini foto ko'rinishida yoki rasm havolasi (https://...) yuboring:"}
             reply(base, cid, prompts.get(field, "Qiymatni yuboring:"))
             answer("Kuting...")
     elif data == "add_new":
         pending[cid] = {"op": "add", "step": "name", "data": {}}
         reply(base, cid, "➕ <b>Yangi gul</b>\n1/7 — Gul nomini yuboring:")
         answer("Boshladik")
+    elif parts[0] == "pdel" and len(parts) == 2:
+        ok = pstore.del_product(base, parts[1])
+        if not ok:
+            answer("Topilmadi")
+            return
+        items = pstore.get_products(base)
+        edit_to(base, cid, mid, f"🗑 O'chirildi.\n\n🌷 <b>Mahsulotlar ({len(items)} ta)</b>\nTahrirlash uchun tanlang:",
+                product_list_markup(items))
+        answer("O'chirildi")
+    elif parts[0] == "f" and len(parts) == 3:
+        try:
+            v = int(parts[2])
+            assert v in (0, 1, 2)
+        except (ValueError, AssertionError):
+            answer("Xato")
+            return
+        try:
+            pstore.upsert_field(base, parts[1], "is_featured", v)
+        except KeyError:
+            answer("Topilmadi")
+            return
+        p = pstore.get_product(base, parts[1])
+        edit_to(base, cid, mid, product_detail_text(p), detail_markup(p))
+        answer(["Oddiy", "TOP", "YANGI"][v])
     elif parts[0] == "c" and len(parts) == 2:
+        st = pending.get(cid)
+        if not st or st.get("op") != "add" or st.get("step") != "cat":
+            answer("Avval /add bilan boshlang")
+            return
+        if parts[1] not in [c["slug"] for c in CATEGORIES]:
+            answer("Noto'g'ri kategoriya")
+            return
+        st["data"]["category"] = parts[1]
+        st["step"] = "price"
+        reply(base, cid, "3/7 — Narxni so'mda yuboring (masalan: 450000):")
+        answer(cat_name(parts[1]))
         st = pending.get(cid)
         if not st or st.get("op") != "add" or st.get("step") != "cat":
             answer("Avval /add bilan boshlang")
@@ -503,6 +586,20 @@ def handle_pending(base: Path, cid: int, text: str) -> bool:
         pending.pop(cid, None)
         reply(base, cid, f"✅ Narx yangilandi!\n\n{product_detail_text(p)}")
         return True
+    if op == "set_old":
+        v = _parse_money(text) or 0
+        try:
+            cur = pstore.get_product(base, st["slug"]) or {}
+            price = (cur.get("price") or 0)
+            new_old = v if v and v > price else None
+            p = pstore.upsert_field(base, st["slug"], "old_price", new_old)
+        except KeyError:
+            pending.pop(cid, None)
+            reply(base, cid, "Mahsulot topilmadi.")
+            return True
+        pending.pop(cid, None)
+        reply(base, cid, f"✅ Eski narx yangilandi!\n\n{product_detail_text(p)}")
+        return True
     if op == "set_stock":
         try:
             v = int(text.replace(" ", ""))
@@ -533,7 +630,17 @@ def handle_pending(base: Path, cid: int, text: str) -> bool:
         reply(base, cid, f"✅ Tavsif yangilandi!\n\n{product_detail_text(p)}")
         return True
     if op == "set_photo":
-        reply(base, cid, "🖼 Rasmni foto ko'rinishida yuboring (fayl ko'rinishida emas):")
+        if text.lower().startswith("http"):
+            try:
+                p = pstore.upsert_field(base, st.get("slug"), "photo", text[:500])
+            except KeyError:
+                pending.pop(cid, None)
+                reply(base, cid, "Mahsulot topilmadi.")
+                return True
+            pending.pop(cid, None)
+            reply(base, cid, f"✅ Rasm yangilandi!\n\n{product_detail_text(p)}")
+            return True
+        reply(base, cid, "🖼 Rasmni foto ko'rinishida yuboring (yoki rasm havolasi https://...):")
         return True
     if op == "add":
         return handle_add_step(base, cid, text, st)
@@ -598,11 +705,16 @@ def handle_add_step(base: Path, cid: int, text: str, st: dict) -> bool:
         reply(base, cid, "7/7 — Gul rasmini foto ko'rinishida yuboring (yoki 'o'tkazish' deb yozing):")
         return True
     if step == "photo":
+        if text.lower().startswith("http"):
+            d["photo"] = text[:500]
+            send_add_confirm(base, cid, d)
+            st["step"] = "confirm"
+            return True
         if text.lower() in ("skip", "o'tkazish", "o'tkazib yuborish", "0", "-", "yo'q"):
             send_add_confirm(base, cid, d)
             st["step"] = "confirm"
             return True
-        reply(base, cid, "🖼 Rasmni foto ko'rinishida yuboring yoki 'o'tkazish' deb yozing:")
+        reply(base, cid, "🖼 Rasmni foto ko'rinishida yuboring, rasm havolasi (https://...) yoki 'o'tkazish' deb yozing:")
         return True
     pending.pop(cid, None)
     return False
@@ -1055,5 +1167,52 @@ def handle_order_callback(base: Path, cb: dict) -> None:
         answer("O'chirildi" if ok else "Topilmadi")
         if ok:
             reply(base, cid, promo_list_text(base))
+    elif data.startswith("panel:"):
+        what = data.split(":", 1)[1]
+        if what == "orders":
+            send_orders_list(base, cid, "pending", 0, edit_mid=mid or 0)
+        elif what == "stats":
+            reply(base, cid, stats_text(base))
+        elif what == "products":
+            send_product_list(base, cid)
+        elif what == "promos":
+            reply(base, cid, promo_list_text(base))
+        elif what == "card":
+            reply(base, cid, card_text(base))
+        answer("Panel")
     else:
         answer("Noma'lum buyruq")
+
+
+def send_panel(base: Path, cid: int) -> None:
+    kb = {"inline_keyboard": [
+        [{"text": "🧾 Buyurtmalar", "callback_data": "panel:orders"},
+         {"text": "📊 Statistika", "callback_data": "panel:stats"}],
+        [{"text": "🌷 Mahsulotlar", "callback_data": "panel:products"},
+         {"text": "🎟 Promo", "callback_data": "panel:promos"}],
+        [{"text": "💳 Karta", "callback_data": "panel:card"}]]}
+    try:
+        tg.call_api(base, "sendMessage", {"chat_id": cid,
+            "text": "⚙️ <b>Admin panel</b>\nBo'limni tanlang:",
+            "parse_mode": "HTML", "reply_markup": json.dumps(kb)}, timeout=15)
+    except Exception as e:
+        log.warning("panel xatosi: %s", e)
+
+
+def send_myorders(base: Path, cid: int) -> None:
+    orders = [o for o in _orders(base)[::-1] if o.get("tg_user") == cid][:5]
+    if not orders:
+        reply(base, cid, "📭 Buyurtmalaringiz topilmadi.\nSaytdan buyurtma bering: azaflowers.uz")
+        return
+    for o in orders:
+        text = (f"📦 Buyurtma {o.get('no', '')}\n{st_label(o.get('status', ''))}\n"
+                f"💰 Jami: {_fm(o.get('total', 0))} so'm")
+        kb = None
+        if o.get("status") == "delivered":
+            kb = {"inline_keyboard": [[
+                {"text": "✅ Qabul qildim", "callback_data": f"recv:{o['id']}"}]]}
+        try:
+            tg.call_api(base, "sendMessage", {"chat_id": cid, "text": text,
+                **({"reply_markup": json.dumps(kb)} if kb else {})}, timeout=15)
+        except Exception as e:
+            log.warning("myorders xatosi: %s", e)
