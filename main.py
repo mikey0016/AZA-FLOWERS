@@ -180,6 +180,8 @@ class OrderNew(BaseModel):
     ship: Optional[str] = "standard"
     pay: Optional[str] = "cash"
     promo: Optional[str] = ""
+    lat: Optional[float] = None
+    lon: Optional[float] = None
     items: list[OrderItem2]
 
 @app.get("/api/promo")
@@ -208,12 +210,15 @@ async def create_order2(o: OrderNew, bg: BackgroundTasks, request: Request):
     u = usersmod.me_by_token(BASE_DIR, _bearer(request))
     oid = int(time.time() * 1000) % 1000000
     addr = ", ".join(x for x in [o.region, o.city, o.address] if x) or o.address
+    if o.lat and o.lon and addr and "xaritada" not in addr:
+        addr += " (xaritada belgilangan 📍)"
     order = {
         "id": oid, "no": f"AZA-{oid}",
         "user_id": u["id"] if u else None,
         "name": o.name.strip(), "phone": o.phone.strip(),
         "address": addr.strip(), "note": (o.note or "").strip(),
         "comment": (o.comment or "").strip(),
+        "lat": o.lat, "lon": o.lon,
         "ship": ship, "ship_label": SHIP_LABEL[ship],
         "pay": o.pay if o.pay in PAY_LABEL else "cash",
         "pay_label": PAY_LABEL.get(o.pay, PAY_LABEL["cash"]),

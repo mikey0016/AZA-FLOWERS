@@ -318,3 +318,9 @@ footer{background:var(--footer);color:#fff;margin-top:40px}
 .paycards{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .paycards span{border:1px solid var(--line);padding:5px 12px;font-size:11px;letter-spacing:1.5px;font-family:var(--disp);font-weight:600;color:var(--ink)}
 @media(max-width:640px){.fgrid2{grid-template-columns:1fr}}
+/* xarita (SAMA uslubi) */
+.mapwrap{border:1px solid var(--line)}
+.omap{height:230px;background:#eef1f4;z-index:1}
+.mapbar{display:flex;gap:10px;align-items:center;padding:8px 10px;border-top:1px solid var(--line);flex-wrap:wrap}
+.mapcoords{font-size:12.5px;color:var(--muted)}
+.btn--sm{padding:9px 18px;font-size:12px}

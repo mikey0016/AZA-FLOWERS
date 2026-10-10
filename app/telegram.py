@@ -105,6 +105,8 @@ def order_text(o: dict) -> str:
         parts.append(f"💳 To'lov: {_h.escape(o['pay_label'])}")
     if o.get("note"):
         parts.append(f"📝 Izoh: {_h.escape(o['note'])}")
+    if o.get("lat") and o.get("lon"):
+        parts.append(f"🗺 Xarita: <a href=\"https://maps.google.com/?q={o['lat']},{o['lon']}\">ochish</a>")
     if o.get("comment"):
         parts.append(f"💬 Izoh: {_h.escape(o['comment'])}")
     parts.append("")

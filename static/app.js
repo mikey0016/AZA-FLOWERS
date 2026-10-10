@@ -142,7 +142,7 @@ function openDrawer(){$('#drawer').classList.add('show');$('#overlay').classList
 function closeDrawer(){$('#drawer').classList.remove('show');$('#overlay').classList.remove('show')}
 window.closeDrawer=closeDrawer;
 /* SAMA uslubidagi checkout: manzil + yetkazish + to'lov + prepay + promokod */
-const CO={ship:'standard',pay:'cash',promo:{code:'',pct:0}};
+const CO={ship:'standard',pay:'cash',promo:{code:'',pct:0},loc:null};
 const SHIP_LABEL={standard:'Standart (Yandex, 3 soat)',express:'Tezkor (1 soat)'};
 const PAY_LABEL={cash:"Naqd / yetkazib berishda",card:'Plastik karta (terminal)',online:"Online to'lov (Click / Payme)"};
 function shipFee(){const s=(CFG.ship||[]).find(x=>x.slug===CO.ship);return s?s.fee:(CO.ship==='express'?30000:0)}
@@ -177,6 +177,7 @@ function renderCheckout(){
       <label class="fld"><span>Hudud *</span><select id="fRegion">${regions.map(r=>`<option>${r}</option>`).join('')}</select></label>
       <label class="fld"><span>Tuman / shahar *</span><input id="fCity" placeholder="Masalan: Chilonzor"></label>
       <label class="fld full"><span>Manzil (ko'cha, uy) *</span><input id="fAddr" placeholder="Masalan: Bunyodkor shoh ko'chasi 12"></label>
+      <div class="fld full"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
       <label class="fld full"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, tabriknoma matni..."></label>
     </div></div>
     <div><h3>Yetkazish usuli</h3><div class="radio-cards" style="margin-top:10px" id="coShip">
@@ -201,6 +202,34 @@ function renderCheckout(){
   $('#promoBtn').onclick=applyPromo;
   $('#sendOrder').onclick=submitOrder;
   refreshCo();
+  setTimeout(initCoMap,120);
+}
+let coMap=null,coMarker=null;
+function initCoMap(){
+  const el=document.getElementById('orderMap');
+  if(!el||typeof L==='undefined')return;
+  if(coMap){try{coMap.remove()}catch(e){} coMap=null;coMarker=null}
+  CO.loc=null;
+  coMap=L.map('orderMap').setView([41.3111,69.2797],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(coMap);
+  coMap.on('click',e=>placeCoLoc(e.latlng.lat,e.latlng.lng));
+  setTimeout(()=>coMap&&coMap.invalidateSize(),300);
+  const fm=document.getElementById('findMe');
+  if(fm)fm.onclick=()=>{
+    if(!navigator.geolocation)return toast('Geolokatsiya topilmadi');
+    toast('Joylashuv aniqlanmoqda...');
+    navigator.geolocation.getCurrentPosition(p=>{
+      placeCoLoc(p.coords.latitude,p.coords.longitude);
+      coMap.setView([p.coords.latitude,p.coords.longitude],15);
+    },()=>toast('Ruxsat berilmadi — xaritani bosing 📍'),{timeout:10000});
+  };
+}
+function placeCoLoc(lat,lon){
+  CO.loc={lat:+lat.toFixed(6),lon:+lon.toFixed(6)};
+  if(coMarker)coMarker.setLatLng([lat,lon]);
+  else coMarker=L.marker([lat,lon]).addTo(coMap);
+  const mc=document.getElementById('mapCoords');
+  if(mc)mc.textContent=`📍 ${CO.loc.lat}, ${CO.loc.lon}`;
 }
 function refreshCo(){
   const t=coTotals();
@@ -224,6 +253,7 @@ async function applyPromo(){
   msg.textContent='Tekshirilmoqda...';msg.className='promo-msg';
   try{
     const r=await fetch('/api/promo?code='+encodeURIComponent(code));
+    if(r.status===404){msg.textContent='⛔ Promokod server restartdan keyin ishlaydi';msg.className='promo-msg err';return}
     const j=await r.json();
     if(j.ok){CO.promo={code:j.code,pct:j.pct};msg.textContent=`✅ ${j.pct}% chegirma qo'llandi!`;msg.className='promo-msg ok'}
     else{CO.promo={code:'',pct:0};msg.textContent='⛔ '+(j.error||'topilmadi');msg.className='promo-msg err'}
@@ -238,10 +268,24 @@ async function submitOrder(){
   if(body.name.length<2)return toast('Ismingizni yozing');
   if(body.phone.replace(/\D/g,'').length<9)return toast('Telefonni to‘g‘ri kiriting');
   if(body.city.length<2)return toast('Tuman / shaharni yozing');
-  if(body.address.length<5)return toast('Manzilni yozing');
+  if(body.address.length<5&&!CO.loc)return toast('Manzilni yozing yoki xaritadan belgilang 📍');
   if(!body.items.length)return toast('Savat bo‘sh');
+  body.lat=CO.loc?CO.loc.lat:null; body.lon=CO.loc?CO.loc.lon:null;
   try{
-    const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)});
+    let r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)});
+    if(r.status===404){
+      // server hali restart qilinmagan — eski API orqali yuboramiz
+      const legacy={name:body.name,phone:body.phone,
+        address:[body.region,body.city,body.address].filter(Boolean).join(', ')+(CO.loc?' (xaritada belgilangan 📍)':''),
+        comment:[body.note,'Yetkazish: '+(SHIP_LABEL[body.ship]||body.ship),'To‘lov: '+(PAY_LABEL[body.pay]||body.pay)].filter(Boolean).join(' | '),
+        items:body.items};
+      r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(legacy)});
+      const lo=await r.json();
+      if(!r.ok)return toast('Xatolik: '+(lo.detail||'qayta urining'));
+      cart={};localStorage.setItem('aza_cart','{}');renderCart();closeModal('#cmodal');
+      toast(`Rahmat! Buyurtma #${lo.order_id} qabul qilindi. Jami: ${fmt(lo.total)}`);
+      return;
+    }
     const o=await r.json();
     if(!r.ok)return toast('Xatolik: '+(o.detail||'qayta urining'));
     cart={};localStorage.setItem('aza_cart','{}');renderCart();

@@ -928,6 +928,10 @@ def handle_check(base: Path, cid: int, msg: dict) -> bool:
             tg.call_api(base, "forwardMessage", {
                 "chat_id": admin, "from_chat_id": cid,
                 "message_id": msg.get("message_id")}, timeout=15)
+            if o.get("lat") and o.get("lon"):
+                tg.call_api(base, "sendLocation", {
+                    "chat_id": admin, "latitude": o["lat"],
+                    "longitude": o["lon"]}, timeout=15)
         except Exception as e:
             log.warning("forward xatosi: %s", e)
     from app.telegram import order_text as _ot
