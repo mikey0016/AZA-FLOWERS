@@ -157,36 +157,37 @@ window.openCheckout=()=>{
   const pr=coProfile();
   const t=coTotals();
   $('#coBody').innerHTML=`
-  <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtmani rasmiylashtirish</h2>
-  <p style="color:var(--muted);font-size:13.5px">Buyurtma uchun <b>50% oldindan to'lov</b> qilinadi.</p>
-  <div class="cform" style="margin-top:14px">
-    <div><h3>Aloqa ma'lumotlari</h3><div class="fgrid2" style="margin-top:10px">
-      <label class="fld"><span>Ism *</span><input id="fName" value="${escA(pr.name)}"></label>
-      <label class="fld"><span>Telefon *</span><input id="fPhone" inputmode="tel" placeholder="+998 __ ___ __ __" value="${escA(pr.phone)}"></label>
+  <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtma berish</h2>
+  <div id="coSummary" style="margin:14px 0"></div>
+  <p id="prepayCardLine" style="font-size:14px;color:var(--body)">💳 50% oldindan to'lov: operatorimiz sizga karta yuboradi.</p>
+  <form id="orderForm" novalidate><div class="cform" style="margin-top:6px">
+    <div><div class="fgrid2">
+      <label class="fld"><span>Ism Familiya *</span><input id="fName" placeholder="Ali Valiyev" value="${escA(pr.name)}"></label>
+      <label class="fld"><span>Telefon *</span><input id="fPhone" inputmode="tel" placeholder="+998 90 770 81 24" value="${escA(pr.phone)}"></label>
     </div></div>
-    <div><h3>Yetkazib berish manzili</h3><div class="fgrid2" style="margin-top:10px">
-      <label class="fld"><span>Hudud *</span><select id="fRegion">${REGIONS.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
-      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" placeholder="Masalan: Chilonzor" value="${escA(pr.city)}"></label>
-      <label class="fld full"><span>Manzil (ko'cha, uy) *</span><input id="fAddr" placeholder="Masalan: Bunyodkor shoh ko'chasi 12" value="${escA(pr.address)}"></label>
-      <label class="fld full"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, tabriknoma matni..." value="${escA(pr.note)}"></label>
+    <div><div class="fgrid2">
+      <label class="fld"><span>Viloyat / shahar *</span><select id="fRegion">${REGIONS.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
+      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" value="${escA(pr.city)}"></label>
     </div></div>
-    <div><h3>Yetkazish usuli</h3><div class="radio-cards" style="margin-top:10px">
-      <label class="radio-card"><input type="radio" name="ship" value="standard" checked><span><b>Standart</b><small>Yandex orqali 3 soatgacha · alohida to'lanadi</small></span></label>
-      <label class="radio-card"><input type="radio" name="ship" value="express"><span><b>Tezkor</b><small>1 soatda · +30 000 so'm</small></span></label>
-    </div></div>
-    <div><h3>To'lov usuli</h3><div class="radio-cards" style="margin-top:10px">
-      <label class="radio-card"><input type="radio" name="pay" value="cash" checked><span><b>Naqd / yetkazib berishda</b><small>Kuryerga naqd to'lov</small></span></label>
-      <label class="radio-card"><input type="radio" name="pay" value="card"><span><b>Plastik karta</b><small>Yetkazib berishda terminal</small></span></label>
-      <label class="radio-card"><input type="radio" name="pay" value="online"><span><b>Online to'lov</b><small>Payme / Click</small></span></label>
-    </div></div>
-    <div class="prepay" id="coPrepay"></div>
-    <div id="coSummary"></div>
-    <button class="btn btn-acc" id="sendOrder" style="width:100%">Buyurtmani tasdiqlash →</button>
-    <p class="hint">🔒 Ma'lumotlaringiz xavfsiz saqlanadi</p>
-  </div>`;
+    <div>
+      <label class="fld"><span>Manzil (ko'cha, uy) <small style="color:var(--muted)">— xarita belgilasangiz shart emas</small></span><input id="fAddr" value="${escA(pr.address)}"></label>
+      <div class="fld" style="margin-top:10px"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
+    </div>
+    <div><div class="fld"><span>To'lov usuli</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
+      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="cash" checked> Naqd</label>
+      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="card"> Karta</label>
+      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="online"> Online</label>
+    </div></div></div>
+    <div><label class="fld"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, lift bor" value="${escA(pr.note)}"></label></div>
+    <div><div class="fld"><span>Yetkazish</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
+      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="ship" value="standard" checked> Standart</label>
+      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="ship" value="express"> Tezkor</label>
+    </div></div></div>
+    <button class="btn btn-acc" id="orderSubmit" style="width:100%">Tasdiqlash</button>
+    </div></form>`;
   document.querySelectorAll('input[name=ship]').forEach(r=>r.onchange=()=>{CO.ship=r.value;refreshCoD()});
   document.querySelectorAll('input[name=pay]').forEach(r=>r.onchange=()=>{CO.pay=r.value});
-  $('#sendOrder').onclick=sendOrderD;
+  $('#orderForm').onsubmit=e=>{e.preventDefault();sendOrderD()};
   refreshCoD();closeDrawer();openModal('#cmodal');
   maskPhone($('#fPhone'));
   setTimeout(initCoMapD,120);
@@ -223,28 +224,51 @@ function initCoMapD(){
 }
 function refreshCoD(){
   const t=coTotals();
-  $('#coPrepay').innerHTML=`<span class="pl">Oldindan to'lov · 50%</span><div class="big">${fmt(t.prepay)}</div>
-  <div class="rest">Qolgan <b>${fmt(t.rest)}</b> yetkazib berishda to'lanadi</div>
-  <div class="cardn">💳 To'lov kartasi: operatorimiz sizga shu chat orqali yuboradi.</div>`;
-  $('#coSummary').innerHTML=t.items.map(i=>`<div class="sumrow"><span>${i.name} × ${i.qty}</span><b>${fmt(i.price*i.qty)}</b></div>`).join('')
-    +`<div class="sumrow"><span>Yetkazish (${SHIP_LABEL[CO.ship]})</span><b>${t.ship?fmt(t.ship):"Yandex alohida"}</b></div>`
+  const box=$('#coSummary');
+  if(box)box.innerHTML=t.items.map(i=>`<div class="sumrow"><span>${i.name} × ${i.qty}</span><b>${fmt(i.price*i.qty)}</b></div>`).join('')
+    +`<div class="sumrow"><span>Yetkazish</span><b>${t.ship?fmt(t.ship):'Bepul'}</b></div>`
     +`<div class="sumrow total"><span>Jami</span><b>${fmt(t.total)}</b></div>`
-    +`<div class="sumrow pre"><span>Oldindan 50%</span><b>${fmt(t.prepay)}</b></div>`;
+    +`<div class="sumrow pre"><span>Oldindan to'lov · 50%</span><b>${fmt(t.prepay)}</b></div>`
+    +`<div class="sumrow"><span>Qolgan (yetkazishda)</span><b>${fmt(t.rest)}</b></div>`;
+  const btn=$('#orderSubmit');
+  if(btn)btn.textContent=`Tasdiqlash · ${fmt(t.total)} (oldindan ${fmt(t.prepay)})`;
 }
+let pendingOrderD=null;
 function sendOrderD(){
-  const name=$('#fName').value.trim(),phone=$('#fPhone').value.trim(),addr=$('#fAddr').value.trim();
-  const region=$('#fRegion').value,city=$('#fCity').value.trim(),note=$('#fNote').value.trim();
-  const items=cartItems();
-  if(name.length<2)return toast('Ismingizni yozing');if(phone.replace(/\D/g,'').length<9)return toast('Telefonni to‘g‘ri kiriting');
-  if(city.length<2)return toast('Tuman / shaharni yozing');if(addr.length<5&&!CO.loc)return toast('Manzilni yozing yoki xaritadan belgilang 📍');if(!items.length)return toast('Savat bo‘sh');
-  saveProfile({name,phone,region,city,address:addr,note});
+  const q=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
+  const body={name:q('fName'),phone:q('fPhone'),region:q('fRegion'),city:q('fCity'),address:q('fAddr'),note:q('fNote'),
+    ship:(document.querySelector('input[name=ship]:checked')||{}).value||'standard',
+    pay:(document.querySelector('input[name=pay]:checked')||{}).value||'cash'};
+  if(!body.name||!body.phone||!body.city)return toast('Iltimos, majburiy maydonlarni to‘ldiring');
+  if(body.phone.replace(/\D/g,'').length<9)return toast('Telefon raqamni to‘g‘ri kiriting');
+  if(!body.address&&!CO.loc)return toast('Manzilni yozing yoki xaritadan belgilang 📍');
+  if(!cartItems().length)return toast('Savat bo‘sh');
+  saveProfile({name:body.name,phone:body.phone,region:body.region,city:body.city,address:body.address,note:body.note});
+  pendingOrderD=body;
+  openModal('#polmodal');
+}
+function doSubmitD(){
+  const f=pendingOrderD;pendingOrderD=null;
+  if(!f)return;
+  closeModal('#polmodal');
   const t=coTotals();
-  const lines=items.map(i=>`• ${i.name} — ${i.qty} dona — ${fmt(i.price*i.qty)}`).join('\n');
+  const lines=t.items.map(i=>`• ${i.name} — ${i.qty} dona — ${fmt(i.price*i.qty)}`).join('\n');
   const locLine=CO.loc?`\n🗺 Xarita: https://maps.google.com/?q=${CO.loc.lat},${CO.loc.lon}`:'';
-  const msg=`🌷 AZA FLOWERS — yangi buyurtma (sayt)\n👤 ${name}\n📞 ${phone}\n📍 ${region}, ${city}, ${addr}${CO.loc?' (xaritada belgilangan 📍)':''}\n💬 ${note||'-'}\n🚚 ${SHIP_LABEL[CO.ship]}\n💳 ${PAY_LABEL[CO.pay]}${locLine}\n\n${lines}\n\nJami: ${fmt(t.total)}\nOldindan 50%: ${fmt(t.prepay)}`;
+  const msg=`🌷 AZA FLOWERS — yangi buyurtma (sayt)\n👤 ${f.name}\n📞 ${f.phone}\n📍 ${f.region}, ${f.city}, ${f.address}${CO.loc?' (xaritada belgilangan 📍)':''}\n💬 ${f.note||'-'}\n🚚 ${SHIP_LABEL[CO.ship]}\n💳 ${PAY_LABEL[CO.pay]}${locLine}\n\n${lines}\n\nJami: ${fmt(t.total)}\nOldindan 50%: ${fmt(t.prepay)}`;
   try{navigator.clipboard.writeText(msg).catch(()=>{})}catch(e){}
   window.open((CFG.contact&&CFG.contact.telegram)||'https://t.me/azaflowers','_blank');
-  cart={};localStorage.setItem('aza_cart','{}');renderCart();closeModal('#cmodal');
+  cart={};localStorage.setItem('aza_cart','{}');renderCart();
+  $('#coBody').innerHTML=`<div style="text-align:center;padding:10px 0">
+    <div style="font-size:52px">✓</div>
+    <h2 style="font-family:var(--serif);font-weight:400;font-size:30px;margin:8px 0">Buyurtmangiz qabul qilindi!</h2>
+    <p style="color:var(--body)">Rahmat, <b>${f.name}</b>!</p>
+    <div style="text-align:left;border:1px solid var(--line);padding:16px;margin:16px 0">
+      <div class="sumrow"><span>Jami</span><b>${fmt(t.total)}</b></div>
+      <div class="sumrow pre"><span>Oldindan 50%</span><b>${fmt(t.prepay)}</b></div>
+      <div class="sumrow"><span>Qolgan</span><b>${fmt(t.rest)}</b></div>
+    </div>
+    <p style="color:var(--body);font-size:14px">Tez orada bog'lanamiz.</p>
+  </div>`;
   toast('Buyurtma matni nusxalandi — Telegramda yuboring 🌷');
 }
 let curSlide=0,slideTimer=null;
@@ -254,6 +278,9 @@ function restartAuto(){clearInterval(slideTimer);slideTimer=setInterval(()=>show
 $('#openCart').onclick=openDrawer;$('#closeCart').onclick=closeDrawer;
 $('#overlay').onclick=()=>{closeDrawer();document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show'));$('#mmenu').classList.remove('show')};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show'));if(!$('#drawer').classList.contains('show'))$('#overlay').classList.remove('show')});
+document.addEventListener('click',e=>{if(e.target.closest('[data-polclose]')){pendingOrderD=null;closeModal('#polmodal')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){pendingOrderD=null;closeModal('#polmodal')}});
+document.addEventListener('click',e=>{if(e.target&&e.target.id==='policyOk')doSubmitD()});
 $('#burger').onclick=()=>{$('#mmenu').classList.add('show');$('#overlay').classList.add('show')};
 $('#mmenuX').onclick=()=>{$('#mmenu').classList.remove('show');$('#overlay').classList.remove('show')};
 document.querySelectorAll('#mmenu [data-navcat]').forEach(a=>a.onclick=()=>{curCat=a.dataset.navcat;renderPills();refresh();$('#mmenu').classList.remove('show');$('#overlay').classList.remove('show')});

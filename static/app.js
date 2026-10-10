@@ -179,52 +179,48 @@ function coTotals(){
 }
 window.openCheckout=()=>{
   if(!cartItems().length)return;
-  CO.ship='standard';CO.pay='cash';CO.promo={code:'',pct:0};
+  CO.ship='standard';CO.pay='cash';CO.promo={code:'',pct:0};pendingOrder=null;
   renderCheckout();closeDrawer();openModal('#cmodal');
 };
 function renderCheckout(){
-  const t=coTotals();
   const regions=CFG.regions||['Toshkent shahri'];
   const pr=coProfile();
-  const ships=CFG.ship||[{slug:'standard',name:'Standart',hint:"Yandex orqali 3 soatgacha · alohida to'lanadi"},{slug:'express',name:'Tezkor',hint:'1 soatda · +30 000 so‘m'}];
-  const card=CFG.pay_card||'';
   $('#coBody').innerHTML=`
-  <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtmani rasmiylashtirish</h2>
-  <p style="color:var(--muted);font-size:13.5px">Buyurtma uchun <b>50% oldindan to'lov</b> qilinadi.</p>
-  <div class="cform" style="margin-top:14px">
-    <div><h3>Aloqa ma'lumotlari</h3><div class="fgrid2" style="margin-top:10px">
-      <label class="fld"><span>Ism *</span><input id="fName" value="${escA(pr.name)}"></label>
-      <label class="fld"><span>Telefon *</span><input id="fPhone" inputmode="tel" placeholder="+998 __ ___ __ __" value="${escA(pr.phone)}"></label>
+  <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtma berish</h2>
+  <div id="coSummary" style="margin:14px 0"></div>
+  <div class="promo-row"><input id="promoInput" placeholder="Promokod (% li)" autocomplete="off"><button class="btn btn-outline" id="promoBtn" style="padding:12px 22px">Qo'llash</button></div>
+  <p class="promo-msg" id="promoMsg"></p>
+  <p id="prepayCardLine" style="font-size:14px;color:var(--body)"></p>
+  <form id="orderForm" novalidate><div class="cform" style="margin-top:6px">
+    <div><div class="fgrid2">
+      <label class="fld"><span>Ism Familiya *</span><input id="fName" placeholder="Ali Valiyev" value="${escA(pr.name)}"></label>
+      <label class="fld"><span>Telefon *</span><input id="fPhone" inputmode="tel" placeholder="+998 90 770 81 24" value="${escA(pr.phone)}"></label>
     </div></div>
-    <div><h3>Yetkazib berish manzili</h3><div class="fgrid2" style="margin-top:10px">
-      <label class="fld"><span>Hudud *</span><select id="fRegion">${regions.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
-      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" placeholder="Masalan: Chilonzor" value="${escA(pr.city)}"></label>
-      <label class="fld full"><span>Manzil (ko'cha, uy) *</span><input id="fAddr" placeholder="Masalan: Bunyodkor shoh ko'chasi 12" value="${escA(pr.address)}"></label>
-      <label class="fld full"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, tabriknoma matni..." value="${escA(pr.note)}"></label>
+    <div><div class="fgrid2">
+      <label class="fld"><span>Viloyat / shahar *</span><select id="fRegion">${regions.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
+      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" value="${escA(pr.city)}"></label>
     </div></div>
-    <div><h3>Yetkazish usuli</h3><div class="radio-cards" style="margin-top:10px" id="coShip">
-      ${ships.map(s=>`<label class="radio-card"><input type="radio" name="ship" value="${s.slug}" ${CO.ship===s.slug?'checked':''}><span><b>${s.name}</b><small>${s.hint}</small></span></label>`).join('')}
-    </div></div>
-    <div><h3>To'lov usuli</h3><div class="radio-cards" style="margin-top:10px" id="coPay">
-      <label class="radio-card"><input type="radio" name="pay" value="cash" checked><span><b>Naqd / yetkazib berishda</b><small>Kuryerga naqd to'lov</small></span></label>
-      <label class="radio-card"><input type="radio" name="pay" value="card"><span><b>Plastik karta</b><small>Yetkazib berishda terminal</small></span></label>
-      <label class="radio-card"><input type="radio" name="pay" value="online"><span><b>Online to'lov</b><small>Payme / Click</small></span></label>
-    </div></div>
-    <div class="prepay" id="coPrepay"></div>
-    <div><h3>Promokod (% li chegirma)</h3>
-      <div class="promo-row" style="margin-top:10px"><input id="promoInput" placeholder="Promokodni kiriting"><button class="btn btn-outline" id="promoBtn" style="padding:12px 22px">Qo'llash</button></div>
-      <p class="promo-msg" id="promoMsg"></p>
+    <div>
+      <label class="fld"><span>Manzil (ko'cha, uy) <small style="color:var(--muted)">— xarita belgilasangiz shart emas</small></span><input id="fAddr" value="${escA(pr.address)}"></label>
+      <div class="fld" style="margin-top:10px"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
     </div>
-    <div id="coSummary"></div>
-    <button class="btn btn-acc" id="sendOrder" style="width:100%">Buyurtmani tasdiqlash →</button>
-    <p class="hint">🔒 Ma'lumotlaringiz xavfsiz saqlanadi</p>
-  </div>`;
+    <div><div class="fld"><span>To'lov usuli</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px" id="coPay">
+      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="cash" checked> Naqd</label>
+      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="card"> Karta</label>
+      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="online"> Online</label>
+    </div></div></div>
+    <div><label class="fld"><span>Izoh (kuryer uchun)</span><input id="fNote" placeholder="Masalan: 2-qavat, lift bor" value="${escA(pr.note)}"></label></div>
+    <div><div class="fld"><span>Yetkazish</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px" id="coShip">
+      ${(CFG.ship||[{slug:'standard',name:'Standart'},{slug:'express',name:'Tezkor'}]).map(s=>`<label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="ship" value="${s.slug}" ${CO.ship===s.slug?'checked':''}> ${s.name}</label>`).join('')}
+    </div></div></div>
+    <button class="btn btn-acc" id="orderSubmit" style="width:100%">Tasdiqlash</button>
+    </div></form>`;
   document.querySelectorAll('#coShip input').forEach(r=>r.onchange=()=>{CO.ship=r.value;refreshCo()});
   document.querySelectorAll('#coPay input').forEach(r=>r.onchange=()=>{CO.pay=r.value});
   $('#promoBtn').onclick=applyPromo;
-  $('#sendOrder').onclick=submitOrder;
-  refreshCo();
+  $('#orderForm').onsubmit=e=>{e.preventDefault();submitOrderForm()};
   maskPhone($('#fPhone'));
+  refreshCo();
   setTimeout(initCoMap,120);
 }
 let coMap=null,coMarker=null;
@@ -257,17 +253,21 @@ function placeCoLoc(lat,lon){
 function refreshCo(){
   const t=coTotals();
   const pct=CFG.prepay_pct||50;
-  const card=CFG.pay_card||'';
-  $('#coPrepay').innerHTML=`<span class="pl">Oldindan to'lov · ${pct}%</span><div class="big">${fmt(t.prepay)}</div>
-  <div class="rest">Qolgan <b>${fmt(t.rest)}</b> yetkazib berishda to'lanadi</div>
-  <div class="cardn">${card?`💳 To'lov kartasi (Click / Payme):<br><code id="payCardNum">${card}</code><br><small>To'lov chekini saqlang — operator tasdiqlaydi.</small>`:`💳 To'lov kartasi: operatorimiz sizga shu chat orqali yuboradi.`}</div>`;
-  const pc=$('#payCardNum');if(pc)pc.onclick=()=>{try{navigator.clipboard.writeText(card);toast('Karta nusxalandi')}catch(e){}};
-  $('#coSummary').innerHTML=t.items.map(i=>`<div class="sumrow"><span>${i.name} × ${i.qty}</span><b>${fmt(i.price*i.qty)}</b></div>`).join('')
-    +`<div class="sumrow"><span>Mahsulotlar</span><b>${fmt(t.sub)}</b></div>`
+  const card=(CFG.pay_card||'').replace(/\D/g,'').replace(/(\d{4})(?=\d)/g,'$1 ');
+  const cl=$('#prepayCardLine');
+  if(cl)cl.innerHTML=CFG.pay_card
+    ? `💳 Oldindan to'lov (Click / Payme):<br><code id="payCardNum" style="background:#fff;border:1px dashed var(--accent-dark);padding:6px 12px;font-size:16px;letter-spacing:1px;cursor:pointer">${card}</code>`
+    : `💳 50% oldindan to'lov: operatorimiz sizga karta yuboradi.`;
+  const pc=$('#payCardNum');if(pc)pc.onclick=()=>{try{navigator.clipboard.writeText(CFG.pay_card);toast('Karta nusxalandi')}catch(e){}};
+  const box=$('#coSummary');
+  if(box)box.innerHTML=t.items.map(i=>`<div class="sumrow"><span>${i.name} × ${i.qty}</span><b>${fmt(i.price*i.qty)}</b></div>`).join('')
     +(t.disc?`<div class="sumrow"><span>Promokod ${CO.promo.code} (−${CO.promo.pct}%)</span><b>−${fmt(t.disc)}</b></div>`:'')
-    +`<div class="sumrow"><span>Yetkazish (${SHIP_LABEL[CO.ship]||CO.ship})</span><b>${t.ship?fmt(t.ship):"Yandex alohida"}</b></div>`
+    +`<div class="sumrow"><span>Yetkazish</span><b>${t.ship?fmt(t.ship):'Bepul'}</b></div>`
     +`<div class="sumrow total"><span>Jami</span><b>${fmt(t.total)}</b></div>`
-    +`<div class="sumrow pre"><span>Oldindan ${pct}%</span><b>${fmt(t.prepay)}</b></div>`;
+    +`<div class="sumrow pre"><span>Oldindan to'lov · ${pct}%</span><b>${fmt(t.prepay)}</b></div>`
+    +`<div class="sumrow"><span>Qolgan (yetkazishda)</span><b>${fmt(t.rest)}</b></div>`;
+  const btn=$('#orderSubmit');
+  if(btn)btn.textContent=`Tasdiqlash · ${fmt(t.total)} (oldindan ${fmt(t.prepay)})`;
 }
 async function applyPromo(){
   const inp=$('#promoInput'),msg=$('#promoMsg');
@@ -283,71 +283,97 @@ async function applyPromo(){
   }catch(e){msg.textContent='⛔ Tekshirib bo‘lmadi';msg.className='promo-msg err'}
   refreshCo();
 }
-async function submitOrder(){
-  const body={name:$('#fName').value.trim(),phone:$('#fPhone').value.trim(),
-    region:$('#fRegion').value,city:$('#fCity').value.trim(),address:$('#fAddr').value.trim(),
-    note:$('#fNote').value.trim(),ship:CO.ship,pay:CO.pay,promo:CO.promo.code,
+function submitOrderForm(){
+  const q=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
+  const body={name:q('fName'),phone:q('fPhone'),
+    region:q('fRegion'),city:q('fCity'),address:q('fAddr'),
+    note:q('fNote'),ship:CO.ship,pay:CO.pay,promo:CO.promo.code,
     items:cartItems().map(i=>({slug:i.slug,qty:i.qty}))};
-  if(body.name.length<2)return toast('Ismingizni yozing');
-  if(body.phone.replace(/\D/g,'').length<9)return toast('Telefonni to‘g‘ri kiriting');
-  if(body.city.length<2)return toast('Tuman / shaharni yozing');
-  if(body.address.length<5&&!CO.loc)return toast('Manzilni yozing yoki xaritadan belgilang 📍');
+  if(!body.name||!body.phone||!body.city)return toast('Iltimos, majburiy maydonlarni to‘ldiring');
+  if(body.phone.replace(/\D/g,'').length<9){toast('Telefon raqamni to‘g‘ri kiriting');const p=$('#fPhone');if(p)p.focus();return}
+  if(!body.address&&!CO.loc){toast('Manzilni yozing yoki xaritadan belgilang 📍');const a=$('#fAddr');if(a)a.focus();return}
   if(!body.items.length)return toast('Savat bo‘sh');
   saveProfile({name:body.name,phone:body.phone,region:body.region,city:body.city,address:body.address,note:body.note});
   body.lat=CO.loc?CO.loc.lat:null; body.lon=CO.loc?CO.loc.lon:null;
+  // Avval qaytarish qoidasi — "Tushundim" bosilgach buyurtma olinadi
+  pendingOrder=body;
+  openModal('#polmodal');
+}
+async function doSubmit(){
+  const body=pendingOrder;pendingOrder=null;
+  if(!body)return;
+  closeModal('#polmodal');
+  const btn=$('#orderSubmit');
+  const btnTxt=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Yuborilmoqda...'}
   try{
     let r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)});
     if(r.status===404){
-      // server hali restart qilinmagan — eski API orqali yuboramiz
+      // server hali restart qilinmagan — eski API orqali yuboramiz, bot qadami baribir ko'rinadi
+      const t=coTotals();
       const legacy={name:body.name,phone:body.phone,
         address:[body.region,body.city,body.address].filter(Boolean).join(', ')+(CO.loc?' (xaritada belgilangan 📍)':''),
         comment:[body.note,'Yetkazish: '+(SHIP_LABEL[body.ship]||body.ship),'To‘lov: '+(PAY_LABEL[body.pay]||body.pay)].filter(Boolean).join(' | '),
         items:body.items};
       r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(legacy)});
       const lo=await r.json();
-      if(!r.ok)return toast('Xatolik: '+(lo.detail||'qayta urining'));
-      cart={};localStorage.setItem('aza_cart','{}');renderCart();closeModal('#cmodal');
-      toast(`Rahmat! Buyurtma #${lo.order_id} qabul qilindi. Jami: ${fmt(lo.total)}`);
+      if(btn){btn.disabled=false;btn.textContent=btnTxt}
+      if(!r.ok){toast('Yuborilmadi: '+(lo.detail||'qayta urining'));return}
+      cart={};localStorage.setItem('aza_cart','{}');renderCart();
+      showSuccess({order_id:lo.order_id,no:'AZA-'+lo.order_id,total:lo.total,prepay:Math.round(lo.total*(CFG.prepay_pct||50)/100),
+        bot_url:`https://t.me/${BOT_USERNAME}?start=ord_${lo.order_id}`},body);
       return;
     }
     const o=await r.json();
-    if(!r.ok)return toast('Xatolik: '+(o.detail||'qayta urining'));
+    if(btn){btn.disabled=false;btn.textContent=btnTxt}
+    if(!r.ok){toast('Yuborilmadi: '+(o.detail||'qayta urining'));return}
     cart={};localStorage.setItem('aza_cart','{}');renderCart();
     showSuccess(o,body);
-  }catch(e){toast('Xatolik — internetni tekshiring')}
+  }catch(e){if(btn){btn.disabled=false;btn.textContent=btnTxt}toast('Xatolik — internetni tekshiring')}
 }
 function showSuccess(o,form){
-  const botUrl=o.bot_url||'https://t.me/azaflowers';
+  const no=o.no||('AZA-'+(o.id||o.order_id));
+  const botUrl=o.bot_url||`https://t.me/${BOT_USERNAME}?start=ord_${o.id||o.order_id}`;
   $('#coBody').innerHTML=`<div style="text-align:center;padding:10px 0">
     <div style="font-size:52px">✓</div>
-    <h2 style="font-family:var(--serif);font-weight:400;font-size:30px;margin:8px 0">Buyurtmangiz qabul qilindi!</h2>
-    <p style="color:var(--body)">Rahmat, <b>${form.name}</b>. Buyurtma raqami: <b>${o.no||('#'+o.order_id)}</b></p>
+    <h2 style="font-family:var(--serif);font-weight:400;font-size:30px;margin:8px 0">Buyurtma ${no} qabul qilindi!</h2>
+    <p style="color:var(--body)">Rahmat, <b>${escA(form.name)}</b>!</p>
     <div style="text-align:left;border:1px solid var(--line);padding:16px;margin:16px 0">
-      <div class="sumrow"><span>Manzil</span><b>${[form.region,form.city,form.address].filter(Boolean).join(', ')}</b></div>
-      <div class="sumrow"><span>To'lov</span><b>${PAY_LABEL[form.pay]||form.pay}</b></div>
-      ${form.promo?`<div class="sumrow"><span>Promokod</span><b>${form.promo}</b></div>`:''}
-      <div class="sumrow total"><span>Jami</span><b>${fmt(o.total)}</b></div>
-      <div class="sumrow pre"><span>Oldindan to'lov</span><b>${fmt(o.prepay)}</b></div>
+      <div class="sumrow"><span>Jami</span><b>${fmt(o.total)}</b></div>
+      <div class="sumrow pre"><span>Oldindan 50%</span><b>${fmt(o.prepay)}</b></div>
+      <div class="sumrow"><span>Qolgan</span><b>${fmt(o.total-o.prepay)}</b></div>
     </div>
-    <div id="coStatus"></div>
-    <h3 style="font-family:var(--serif);font-weight:400;font-size:22px;margin:14px 0 6px">Keyingi qadam — to'lov 💳</h3>
-    <p style="color:var(--body);font-size:14px"><b>${fmt(o.prepay)}</b> ni to'lang va chekni botga yuboring.</p>
-    <a class="btn btn-acc" style="width:100%;margin-top:8px" target="_blank" href="${botUrl}">✈ Botga o'tish va chek yuborish</a>
-    <p class="hint">⚠️ Aynan <b>${fmt(o.prepay)}</b> to'lang — ko'p ham, kam ham emas.</p>
+    <div class="obotgo">
+      <h3 style="font-family:var(--serif);font-weight:400;font-size:22px;margin:6px 0">Keyingi qadam — 50% to'lov 💳</h3>
+      <p style="color:var(--body);font-size:14px"><b>${fmt(o.prepay)}</b> ni to'lang va chekni botga yuboring.</p>
+      <a class="btn btn-acc" style="width:100%;margin-top:8px" target="_blank" rel="noopener" href="${botUrl}">✈ Botga o'tish va chek yuborish</a>
+      <p class="hint">⚠️ Aynan <b>${fmt(o.prepay)}</b> to'lang — ko'p ham, kam ham emas. Chek tekshirilgach, buyurtma adminga o'tadi.</p>
+    </div>
   </div>`;
   pollOrder(o.id||o.order_id,0);
 }
+let coTries=0;
 async function pollOrder(oid,n){
-  if(n>60||!document.getElementById('coStatus'))return;
+  const box=document.querySelector('#coBody .obotgo, #coBody .ocheck');
+  if(!box)return;
+  if(n>144)return; // ~12 daqiqa kuzatadi
   try{
     const r=await fetch('/api/order?id='+oid);
-    if(!r.ok)return;
     const j=await r.json();
-    const box=document.getElementById('coStatus');if(!box)return;
-    const st=j.status;
-    if(st==='awaiting_confirm')box.innerHTML=`<div class="prepay" style="margin-top:10px"><b>📸 Chek qabul qilindi!</b><br><span style="font-size:13.5px">Admin tekshirmoqda...</span></div>`;
-    else if(['accepted','qabul','preparing','delivering'].includes(st)){box.innerHTML=`<div class="prepay" style="margin-top:10px"><b>✓ Buyurtma qabul qilindi, rahmat! 🎉</b><br><span style="font-size:13.5px">To'lovingiz tasdiqlandi.</span></div>`;return}
-    else if(['rejected','cancelled'].includes(st)){box.innerHTML=`<div class="prepay" style="margin-top:10px;border-color:var(--sale)"><b>❌ Buyurtma tasdiqlanmadi</b><br><span style="font-size:13.5px">Chekda muammo — qayta urinib ko'ring.</span></div>`;return}
+    if(j&&j.ok){
+      const st=j.status;
+      if(st==='awaiting_confirm'&&!box.classList.contains('ocheck')){
+        box.outerHTML=`<div class="obotgo ocheck" style="text-align:center"><h3 style="font-family:var(--serif);font-weight:400;font-size:22px">📸 Chek qabul qilindi!</h3><p style="color:var(--body);font-size:14px">Admin tekshirmoqda, kuting...</p></div>`;
+      }else if(['accepted','qabul','preparing','delivering','delivered','closed'].includes(st)){
+        const el=document.querySelector('#coBody .obotgo, #coBody .ocheck');
+        if(el)el.outerHTML=`<div class="obotgo" style="text-align:center"><div style="font-size:52px">✓</div><h3 style="font-family:var(--serif);font-weight:400;font-size:22px">Buyurtma qabul qilindi, rahmat! 🎉</h3><p style="color:var(--body);font-size:14px">To'lovingiz tasdiqlandi. Tez orada bog'lanamiz.</p></div>`;
+        return;
+      }else if(['rejected','cancelled'].includes(st)){
+        const el=document.querySelector('#coBody .obotgo, #coBody .ocheck');
+        if(el)el.outerHTML=`<div class="obotgo" style="text-align:center"><h3 style="font-family:var(--serif);font-weight:400;font-size:22px">❌ Buyurtma tasdiqlanmadi</h3><p style="color:var(--body);font-size:14px">Chekda muammo topildi. Operatorimiz siz bilan bog'lanadi.</p></div>`;
+        return;
+      }
+    }
   }catch(e){}
   setTimeout(()=>pollOrder(oid,n+1),5000);
 }
@@ -374,6 +400,9 @@ function restartAuto(){clearInterval(slideTimer);slideTimer=setInterval(()=>show
 $('#openCart').onclick=openDrawer;$('#closeCart').onclick=closeDrawer;
 $('#overlay').onclick=()=>{closeDrawer();document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show'));$('#mmenu').classList.remove('show')};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show'));if(!$('#drawer').classList.contains('show'))$('#overlay').classList.remove('show')});
+document.addEventListener('click',e=>{if(e.target.closest('[data-polclose]')){pendingOrder=null;closeModal('#polmodal')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){pendingOrder=null;closeModal('#polmodal')}});
+document.addEventListener('click',e=>{if(e.target&&e.target.id==='policyOk')doSubmit()});
 $('#burger').onclick=()=>{$('#mmenu').classList.add('show');$('#overlay').classList.add('show')};
 $('#mmenuX').onclick=()=>{$('#mmenu').classList.remove('show');$('#overlay').classList.remove('show')};
 document.querySelectorAll('#mmenu [data-navcat]').forEach(a=>a.onclick=()=>{curCat=a.dataset.navcat;renderPills();refresh();$('#mmenu').classList.remove('show');$('#overlay').classList.remove('show')});

@@ -158,6 +158,16 @@
 <aside class="drawer" id="drawer"><div class="dhead"><span>Savat</span><button class="pill" id="closeCart">Yopish ✕</button></div><div class="dbody" id="cartBody"></div><div class="dfoot" id="cartFoot"></div></aside>
 <div class="modal" id="pmodal"><div class="mbox"><button class="mx" data-close>✕</button><div class="mgrid"><div class="l" id="pmImg"></div><div class="r" id="pmBody"></div></div></div></div>
 <div class="modal" id="cmodal"><div class="mbox" style="max-width:620px"><button class="mx" data-close>✕</button><div style="padding:26px" id="coBody"></div></div></div>
+<div class="modal" id="polmodal"><div class="mbox" style="max-width:460px"><div style="padding:26px">
+<h3 style="font-family:var(--serif);font-weight:400;font-size:24px;margin:0 0 10px">⚠️ Qaytarish qoidasi</h3>
+<ul style="color:var(--body);font-size:14px;line-height:1.9;margin:0 0 0 18px">
+<li>Buyurtma uchun <b>50% oldindan to'lov</b> qilinadi.</li>
+<li>Qaytarish faqat bizning xatolikda: fotosidagidan farq qilsa yoki 24 soatda so'lib qolsa.</li>
+<li>Manzil/to'lovdagi xatolikka qaytarish yo'q — ma'lumotlarni tekshiring.</li>
+<li>Toshkent bo'ylab 3 soatda yetkaziladi.</li>
+</ul>
+<div style="display:flex;gap:10px;margin-top:18px"><button class="btn btn-outline" data-polclose style="flex:1">Bekor qilish</button><button class="btn btn-acc" id="policyOk" style="flex:1">Tushundim, davom etish</button></div>
+</div></div></div>
 <div class="modal" id="amodal"><div class="mbox" style="max-width:440px"><button class="mx" data-close>✕</button><div style="padding:26px"><h2 style="margin:0;font-family:var(--serif);font-size:34px;font-weight:400" id="kirish">Xush kelibsiz</h2><div class="tabs-sm"><button class="tab on" id="tabLogin">Kirish</button><button class="tab" id="tabReg">Ro'yxatdan o'tish</button></div><div class="form" id="paneLogin"><input id="lPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="lPass" type="password" placeholder="Parol"><button class="btn btn-acc" id="doLogin" style="width:100%">Kirish →</button></div><div class="form" id="paneReg" style="display:none"><input id="rName" placeholder="Ismingiz *"><input id="rPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="rPass" type="password" placeholder="Parol (kamida 4 belgi)"><button class="btn btn-acc" id="doReg" style="width:100%">Ro'yxatdan o'tish →</button></div></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

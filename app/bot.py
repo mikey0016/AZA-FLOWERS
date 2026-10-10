@@ -864,13 +864,18 @@ def card_text(base: Path) -> str:
 
 def payment_instructions(base: Path, o: dict) -> str:
     from app import payments as paymod
-    card = paymod.get_payment(base).get("pay_card", "")
+    pay = paymod.get_payment(base)
+    card = pay.get("pay_card", "")
+    pct = pay.get("prepay_pct", 50)
+    prepay = o.get("prepay")
+    if prepay is None:
+        prepay = round(o.get("total", 0) * pct / 100)
     card_block = f"<code>{_h.escape(card)}</code>" if card else "Karta raqamini operatorimiz yuboradi."
     return (
         f"🧾 Buyurtma {o.get('no', '')}\n"
         f"💰 Jami: {_fm(o.get('total', 0))} so'm\n"
-        f"💳 Oldindan ({paymod.get_payment(base).get('prepay_pct', 50)}%): <code>{_fm(o.get('prepay', 0))}</code>\n\n"
-        f"⛔️ MUHIM: Aynan {_fm(o.get('prepay', 0))} to'lang — ko'p ham, kam ham emas.\n\n"
+        f"💳 Oldindan ({pct}%): <code>{_fm(prepay)}</code>\n\n"
+        f"⛔️ MUHIM: Aynan {_fm(prepay)} to'lang — ko'p ham, kam ham emas.\n\n"
         f"💳 Karta:\n{card_block}\n\n"
         "1-qadam: To'lovni qiling\n"
         "2-qadam: Chekni shu yerga rasm qilib yuboring 📸"
@@ -914,9 +919,11 @@ def handle_check(base: Path, cid: int, msg: dict) -> bool:
         return False
     orders = _orders(base)
     o = next((x for x in orders[::-1]
-              if x.get("tg_user") == cid and x.get("status") == "awaiting_payment"), None)
+              if x.get("tg_user") == cid and x.get("status") in ("awaiting_payment", "yangi")), None)
     if not o:
         return False
+    if o.get("prepay") is None:
+        o["prepay"] = round(o.get("total", 0) / 2)
     file_id = photos[-1].get("file_id")
     o["check_file"] = file_id
     o["status"] = "awaiting_confirm"
