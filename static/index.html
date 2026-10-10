@@ -3,113 +3,161 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AZA FLOWERS — Premium gullar | Toshkent</title>
-<meta name="description" content="AZA FLOWERS — premium buketlar, atirgullar, pionlar. Har kuni 08:00-22:00, Toshkent bo'ylab tez yetkazish.">
-<meta name="theme-color" content="#ffffff">
+<title>Premium gullar va buketlar O'zbekistonda | AZA FLOWERS</title>
+<meta name="description" content="Premium buketlar O'zbekistonda: atirgullar, lolalar, pionlar, kompozitsiyalar. Har kuni 08:00-22:00, Toshkent bo'ylab tez yetkazish.">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/style.css?v=20">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Roboto+Slab:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css?v=30">
 <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
 </head>
 <body>
-<!-- Qora yuqori lenta — Ciello dagi kabi -->
+<!-- TOPBAR -->
 <div class="topbar"><div class="container">
-  <span><i>✦</i> Toshkent bo'ylab tezkor yetkazish — 3 soatgacha</span>
-  <span><i>✦</i> Har bir buyurtmaga otkritka va o'ram sovg'a</span>
+  <span class="lang"><a href="/" class="on">🇺🇿 Uzbek</a><a href="/">RU</a></span>
+  <span class="tb"><b id="hPhone">+998 90 350 71 78</b></span>
+  <span class="tb">Telegram <b>@azaflowers</b></span>
+  <span class="tb addr">Tashkent, Uzbekistan</span>
+  <span class="sp"></span>
+  <span class="promo">Har hafta eng yaxshi takliflar! Butun Toshkent bo'ylab yetkazish!</span>
+  <span class="soc"><a id="socIg" target="_blank" title="Instagram">◉</a><a id="socTg" target="_blank" title="Telegram">✈</a></span>
 </div></div>
 
+<!-- HEADER -->
 <header class="header">
   <div class="container hmain">
+    <button class="burger" id="burger" aria-label="Menyu">☰</button>
     <a class="logo" href="#top"><img src="/static/logo.svg" alt="AZA"><span class="t"><b>AZA</b><small>FLOWERS • TASHKENT</small></span></a>
-    <div class="searchwrap">
-      <label class="search">⌕ <input id="q" placeholder="Qanday gul qidiryapsiz?" autocomplete="off"></label>
-    </div>
-    <div class="hactions">
-      <div class="hphone"><small>Har kuni 08:00 – 22:00</small><b id="hPhone">+998 90 350 71 78</b></div>
+    <nav class="c-top-menu" id="mainNav">
+      <a href="#katalog">Gul katalogi</a>
+      <a href="#katalog" data-navcat="buketlar">Buketlar</a>
+      <a href="#katalog" data-navcat="atirgullar">Atirgullar</a>
+      <a href="#katalog" data-navcat="kompozitsiyalar">Kompozitsiyalar</a>
+      <a href="#katalog" data-navcat="toy">To'y</a>
+      <a href="#aksiya" class="sale">Sale</a>
+    </nav>
+    <div class="hicons">
+      <div class="hphone"><small>Har kuni 08:00 – 22:00</small><b id="hPhone2">+998 90 350 71 78</b></div>
       <span id="authArea"></span>
+      <button class="iconbtn" id="searchBtn" title="Qidiruv">⌕</button>
       <button class="iconbtn" id="wishBtn" title="Sevimlilar">♡<span class="n" id="wishN" style="display:none">0</span></button>
-      <button class="iconbtn cart" id="openCart" title="Savat">🛒<span class="n" id="cartN">0</span></button>
+      <button class="iconbtn" id="openCart" title="Savat">🛒<span class="n" id="cartN">0</span></button>
     </div>
   </div>
-  <nav class="mainnav"><div class="container" id="mainNav">
-    <a href="#katalog">Katalog</a>
-    <a href="#katalog" data-navcat="buketlar">Buketlar</a>
-    <a href="#katalog" data-navcat="atirgullar">Atirgullar</a>
-    <a href="#katalog" data-navcat="kompozitsiyalar">Kompozitsiyalar</a>
-    <a href="#katalog" data-navcat="sovgalar">Sovg'alar</a>
-    <a href="#katalog" data-navcat="toy">To'y</a>
-    <a href="#aksiya" class="sale">Sale</a>
-  </div></nav>
 </header>
 
-<main id="top" class="container">
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-l">
-      <span class="eyebrow">Premium gul uyi — Toshkent</span>
-      <h1>Sevgi izhor <em>qilishning</em> eng chiroyli yo'li</h1>
-      <p class="sub">101 dona atirguldan to'y buketigacha — barchasi qo'lda saralangan, premium o'ramda va <b>Yandex orqali 3 soatgacha yetkazish</b> bilan.</p>
-      <div class="cta"><a class="btn btn-dark" href="#katalog">Katalogni ko'rish</a><a class="btn btn-light" href="#aksiya">Top takliflar</a></div>
-      <div class="hero-meta"><div><b>14+</b>mahsulot</div><div><b>4.9 ★</b>1200+ sharh</div><div><b>3 soat</b>gacha yetkazish</div></div>
+<!-- SEARCH -->
+<div class="search-ov" id="searchOv">
+  <button class="x" id="searchX">✕</button>
+  <div class="box"><input id="q" placeholder="Nom yoki artikul yozishni boshlang..." autocomplete="off"><p class="hint">Masalan: atirgul, lola, pion</p></div>
+</div>
+
+<!-- MOBILE MENU -->
+<aside class="mmenu" id="mmenu">
+  <button class="x" id="mmenuX">✕</button>
+  <a href="#katalog">Gul katalogi</a>
+  <a href="#katalog" data-navcat="buketlar">Buketlar</a>
+  <a href="#katalog" data-navcat="atirgullar">Atirgullar</a>
+  <a href="#katalog" data-navcat="kompozitsiyalar">Kompozitsiyalar</a>
+  <a href="#katalog" data-navcat="sovgalar">Sovg'alar</a>
+  <a href="#katalog" data-navcat="toy">To'y</a>
+  <a href="#aksiya" class="sale">Sale</a>
+</aside>
+
+<main id="top">
+  <!-- HERO SLIDER -->
+  <section class="hero" id="hero">
+    <div class="slide on">
+      <div class="container">
+        <div>
+          <h1>Premium gullar va buketlar O'zbekistonda — <em>atirgul, lola, pion</em> yetkazib berish bilan</h1>
+          <p class="sub">101 dona atirguldan to'y buketigacha — barchasi qo'lda saralangan, premium o'ramda va Yandex orqali 3 soatgacha yetkazish bilan.</p>
+          <div class="cta"><a class="btn btn-acc" href="#katalog">Xarid qilish</a></div>
+        </div>
+        <div class="photo" id="heroVis"></div>
+      </div>
     </div>
-    <div class="hero-r"><div class="hgrid" id="heroVis"></div></div>
+    <div class="slide">
+      <div class="container">
+        <div>
+          <h1>To'y kolleksiyasi <em>White Luxury</em> — kelin buketlari</h1>
+          <p class="sub">Oq atirgul, pion va ipak lenta. Buyurtmadan oldin eskiz va narxni kelishamiz.</p>
+          <div class="cta"><a class="btn btn-acc" href="#katalog">Xarid qilish</a></div>
+        </div>
+        <div class="photo" id="heroVis2"></div>
+      </div>
+    </div>
+    <button class="arr l" id="slidePrev">←</button>
+    <button class="arr r" id="slideNext">→</button>
+    <div class="dots" id="slideDots"></div>
   </section>
 
-  <section class="perks">
-    <div class="perk"><i>🚚</i> 3 soatgacha yetkazish</div>
-    <div class="perk"><i>🌸</i> Yangi uzilgan gullar</div>
-    <div class="perk"><i>💳</i> Naqd / karta / Click</div>
-    <div class="perk"><i>📸</i> Jo'natishdan oldin foto</div>
-  </section>
+  <!-- RUNNING LINE -->
+  <div class="runline"><div class="track" id="runTrack"><span>Yangi uzilgan gullar <i>♥</i></span><span>3 soatda yetkazish <i>♥</i></span><span>Otkritka sovg'a <i>♥</i></span><span>Jo'natishdan oldin foto <i>♥</i></span><span>Yangi uzilgan gullar <i>♥</i></span><span>3 soatda yetkazish <i>♥</i></span><span>Otkritka sovg'a <i>♥</i></span><span>Jo'natishdan oldin foto <i>♥</i></span></div></div>
 
-  <!-- Doira kategoriyalar -->
-  <section class="sec" id="cats"><div class="sechead"><div><h2>Kategoriyalar</h2><p>Kayfiyatingizga mos to'plamni tanlang</p></div><a href="#katalog">Barchasi →</a></div>
-    <div class="cats" id="catCircles"></div>
-  </section>
+  <div class="container">
+    <!-- CATEGORIES -->
+    <section class="sec" id="cats"><div class="sechead"><h2>Kategoriyalar</h2><p>Kayfiyatingizga mos to'plamni tanlang</p></div>
+      <div class="cats" id="catCircles"></div>
+    </section>
 
-  <!-- Kolleksiya bannerlar -->
-  <section class="collections">
-    <div class="collection c1"><div><small>Kolleksiya • Hit</small><h3>Red Roses Passion</h3><a class="go" href="#katalog" data-navcat="atirgullar">Xarid qilish →</a></div></div>
-    <div class="collection c2"><div><small>Kolleksiya • Wedding</small><h3>White Luxury Paradise</h3><a class="go" href="#katalog" data-navcat="toy">Xarid qilish →</a></div></div>
-    <div class="collection c3"><div><small>Aksiya • -20%</small><h3>Pionlar mavsumi</h3><a class="go" href="#aksiya">Xarid qilish →</a></div></div>
-  </section>
+    <!-- TABS -->
+    <section class="sec" id="aksiya"><div class="sechead"><h2>Saralanganlar</h2></div>
+      <div class="tabs"><button class="tabbtn on" data-tab="new">Yangiliklar</button><button class="tabbtn" data-tab="hit">Xitlar</button><button class="tabbtn" data-tab="sale">Chegirmalar</button></div>
+      <div class="grid" id="tabGrid"></div>
+    </section>
 
-  <!-- Tablar: Yangiliklar / Xitlar / Chegirmalar -->
-  <section class="sec" id="aksiya"><div class="sechead"><div><h2>Saralanganlar</h2><p>Har hafta yangilanadigan eng yaxshi takliflar</p></div></div>
-    <div class="tabs"><button class="tabbtn on" data-tab="new">Yangiliklar</button><button class="tabbtn" data-tab="hit">Xitlar</button><button class="tabbtn" data-tab="sale">Chegirmalar</button></div>
-    <div class="grid" id="tabGrid"></div>
-  </section>
+    <!-- BANNERS -->
+    <section class="banners">
+      <div class="banner"><div class="bg" data-bannerbg="0"></div><div class="tx"><small>Kolleksiya</small><h3>Red Roses Passion</h3><a class="go" href="#katalog" data-navcat="atirgullar">Xarid qilish →</a></div></div>
+      <div class="banner"><div class="bg" data-bannerbg="1"></div><div class="tx"><small>Kolleksiya</small><h3>White Luxury Paradise</h3><a class="go" href="#katalog" data-navcat="toy">Xarid qilish →</a></div></div>
+      <div class="banner"><div class="bg" data-bannerbg="2"></div><div class="tx"><small>Aksiya</small><h3>Pionlar −20% gacha</h3><a class="go" href="#aksiya">Xarid qilish →</a></div></div>
+    </section>
 
-  <section class="sec" id="katalog"><div class="sechead"><div><h2>Katalog</h2><p id="cfgLine">Yuklanmoqda...</p></div></div>
-    <div class="pills" id="pills"></div>
-    <div class="toolbar"><select class="sort" id="sort"><option value="popular">Mashhurligi bo'yicha</option><option value="cheap">Arzonlari</option><option value="expensive">Qimmatlari</option><option value="discount">Chegirmalilar</option></select><span class="count" id="count"></span></div>
-    <div style="height:14px"></div><div class="grid" id="grid"></div>
-  </section>
+    <!-- FEATURE -->
+    <section class="feature">
+      <div class="ph" id="featImg"></div>
+      <div><span class="eyebrow">Kolleksiya • Atirgul</span><h2>Har bir gul ortida — tarix</h2>
+      <p>Ekvador atirgullari 60 sm poyada, Gollandiya lolalari esa har tongda keltiriladi. Buket yig'ilishidan oldin har bir gul qo'lda saralanadi — so'ligan barg, egri poya o'tmaydi.</p>
+      <a class="btn btn-acc" href="#katalog">Xarid qilish</a></div>
+    </section>
 
-  <section class="sec info" id="yetkazish">
-    <div class="infobox"><h3>Yetkazib berish</h3><p id="delText"></p><ul><li>Shahar bo'ylab 2–3 soatda</li><li>Buyurtmadan oldin gul fotosini yuboramiz</li><li>Atkritka va lenta — bepul</li></ul></div>
-    <div class="infobox" id="aloqa"><h3>Aloqa</h3><p id="contactBox"></p><div class="cta" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><a class="btn btn-dark" id="tgBtn" target="_blank">Telegram yozish</a><a class="btn btn-light" id="insBtn" target="_blank">Instagram</a></div></div>
-  </section>
+    <!-- CATALOG -->
+    <section class="sec" id="katalog"><div class="sechead"><h2>Katalog</h2><p id="cfgLine">Yuklanmoqda...</p></div>
+      <div class="pills" id="pills"></div>
+      <div class="toolbar"><select class="sort" id="sort"><option value="popular">Mashhurligi bo'yicha</option><option value="cheap">Arzonlari</option><option value="expensive">Qimmatlari</option><option value="discount">Chegirmalilar</option></select><span class="count" id="count"></span></div>
+      <div style="height:14px"></div><div class="grid" id="grid"></div>
+    </section>
+
+    <!-- PERKS -->
+    <section class="perks">
+      <div class="perk"><i>🚚</i><b>Tez yetkazish</b><span>Toshkent bo'ylab 3 soatgacha</span></div>
+      <div class="perk"><i>💐</i><b>Katta assortiment</b><span>Har kuni yangi gullar</span></div>
+      <div class="perk"><i>🛡️</i><b>Sifat kafolati</b><span>24 soatlik almashtirish</span></div>
+    </section>
+
+    <section class="info" id="yetkazish">
+      <div class="infobox"><h3>Yetkazib berish</h3><p id="delText"></p><ul><li>Shahar bo'ylab 2–3 soatda Yandex orqali</li><li>Buyurtmadan oldin gul fotosini yuboramiz</li><li>Atkritka va lenta — bepul</li></ul></div>
+      <div class="infobox" id="aloqa"><h3>Aloqa</h3><p id="contactBox"></p><div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><a class="btn btn-acc" id="tgBtn" target="_blank">Telegram yozish</a><a class="btn btn-outline" id="insBtn" target="_blank">Instagram</a></div></div>
+    </section>
+  </div>
 </main>
 
 <footer>
   <div class="container fgrid">
-    <div><div class="flogo"><img src="/static/logo.svg" alt="AZA"><span>AZA FLOWERS</span></div>
-      <p class="m">Toshkentdagi premium gul uyi. Sevgi, to'y, tug'ilgan kun — har qanday kunni unutilmas qiling.</p>
-      <div class="social"><a id="tgBtnF" target="_blank">Telegram</a><a id="insBtnF" target="_blank">Instagram</a></div></div>
-    <div><b class="fh">Katalog</b><div class="flinks" id="footCats"></div></div>
-    <div><b class="fh">Mijozlarga</b><div class="flinks"><a href="/about">Biz haqimizda</a><a href="/track">Buyurtmani kuzatish</a><a href="/cabinet">Shaxsiy kabinet</a><a href="#yetkazish">Yetkazish</a></div></div>
-    <div><b class="fh">Kontakt</b><div id="footContact"></div><a href="#top" style="color:#fff;font-size:13px">↑ Yuqoriga qaytish</a></div>
+    <div><b class="fh">Xaridorga</b><div class="flinks"><a href="#katalog" id="fWish">Sevimlilar</a><a href="/cabinet">Akkaunt</a><a href="#top" id="fCart">Savat</a><a href="/about">Blog</a></div></div>
+    <div><b class="fh">Ma'lumot</b><div class="flinks"><a href="/about">Kontaktlar</a><a href="#yetkazish">To'lov va yetkazish</a><a href="/track">Buyurtmani kuzatish</a><a href="/about">Parvarish bo'yicha tavsiyalar</a><a href="/about">Kafolat</a><a href="/about">Maxfiylik siyosati</a></div></div>
+    <div><b class="fh">Kontaktlar</b><div id="footContact"></div><div class="social"><a id="tgBtnF" target="_blank">✈</a><a id="insBtnF" target="_blank">◉</a></div></div>
   </div>
-  <div class="fbottom"><div class="container fbin"><span>© 2026 AZA FLOWERS — barcha huquqlar himoyalangan</span><span>Har kuni 08:00 – 22:00 • Toshkent</span></div></div>
+  <div class="fbottom"><div class="container fbin"><span>© 2026 AZA FLOWERS. Barcha huquqlar himoyalangan.</span><span class="pay"><span>UZCARD</span><span>HUMO</span><span>VISA</span><span>CLICK</span></span></div></div>
 </footer>
 
 <div class="overlay" id="overlay"></div>
-<aside class="drawer" id="drawer"><div class="dhead"><span>Savat 🛒</span><button class="linkbtn" id="closeCart">Yopish ✕</button></div><div class="dbody" id="cartBody"></div><div class="dfoot" id="cartFoot"></div></aside>
+<aside class="drawer" id="drawer"><div class="dhead"><span>Savat</span><button class="pill" id="closeCart">Yopish ✕</button></div><div class="dbody" id="cartBody"></div><div class="dfoot" id="cartFoot"></div></aside>
 <div class="modal" id="pmodal"><div class="mbox"><button class="mx" data-close>✕</button><div class="mgrid"><div class="l" id="pmImg"></div><div class="r" id="pmBody"></div></div></div></div>
-<div class="modal" id="cmodal"><div class="mbox" style="max-width:520px"><button class="mx" data-close>✕</button><div style="padding:26px"><h2 style="margin:0;font-family:var(--serif);font-size:38px;font-weight:500">Buyurtma berish</h2><p style="color:var(--muted)" id="sumLine"></p><div class="form"><input id="fName" placeholder="Ismingiz *"><input id="fPhone" placeholder="Telefon: +998 ... *"><input id="fAddr" placeholder="Manzil: tuman, ko'cha, uy *"><textarea id="fCom" rows="2" placeholder="Izoh (ixtiyoriy): tabriknoma matni..."></textarea><button class="btn btn-dark" id="sendOrder">Buyurtmani tasdiqlash →</button><p class="hint">Tasdiqlangach, buyurtma adminlarga Telegram orqali yuboriladi.</p></div></div></div></div>
-<div class="modal" id="amodal"><div class="mbox" style="max-width:440px"><button class="mx" data-close>✕</button><div style="padding:26px"><h2 style="margin:0;font-family:var(--serif);font-size:40px;font-weight:500" id="kirish">Xush kelibsiz</h2><div class="tabs-sm"><button class="tab on" id="tabLogin">Kirish</button><button class="tab" id="tabReg">Ro'yxatdan o'tish</button></div><div class="form" id="paneLogin"><input id="lPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="lPass" type="password" placeholder="Parol"><button class="btn btn-dark" id="doLogin">Kirish →</button></div><div class="form" id="paneReg" style="display:none"><input id="rName" placeholder="Ismingiz *"><input id="rPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="rPass" type="password" placeholder="Parol (kamida 4 belgi)"><button class="btn btn-dark" id="doReg">Ro'yxatdan o'tish →</button></div></div></div></div>
+<div class="modal" id="cmodal"><div class="mbox" style="max-width:520px"><button class="mx" data-close>✕</button><div style="padding:26px"><h2 style="margin:0;font-family:var(--serif);font-size:32px;font-weight:400">Buyurtma berish</h2><p style="color:var(--muted)" id="sumLine"></p><div class="form"><input id="fName" placeholder="Ismingiz *"><input id="fPhone" placeholder="Telefon: +998 ... *"><input id="fAddr" placeholder="Manzil: tuman, ko'cha, uy *"><textarea id="fCom" rows="2" placeholder="Izoh (ixtiyoriy): tabriknoma matni..."></textarea><button class="btn btn-acc" id="sendOrder" style="width:100%">Buyurtmani tasdiqlash →</button><p class="hint">Tasdiqlangach, buyurtma adminlarga Telegram orqali yuboriladi.</p></div></div></div></div>
+<div class="modal" id="amodal"><div class="mbox" style="max-width:440px"><button class="mx" data-close>✕</button><div style="padding:26px"><h2 style="margin:0;font-family:var(--serif);font-size:34px;font-weight:400" id="kirish">Xush kelibsiz</h2><div class="tabs-sm"><button class="tab on" id="tabLogin">Kirish</button><button class="tab" id="tabReg">Ro'yxatdan o'tish</button></div><div class="form" id="paneLogin"><input id="lPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="lPass" type="password" placeholder="Parol"><button class="btn btn-acc" id="doLogin" style="width:100%">Kirish →</button></div><div class="form" id="paneReg" style="display:none"><input id="rName" placeholder="Ismingiz *"><input id="rPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="rPass" type="password" placeholder="Parol (kamida 4 belgi)"><button class="btn btn-acc" id="doReg" style="width:100%">Ro'yxatdan o'tish →</button></div></div></div></div>
 <div class="toast" id="toast"></div>
-<script src="/static/app.js?v=20"></script>
+<script src="/static/app.js?v=30"></script>
 </body></html>
