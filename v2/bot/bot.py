@@ -11,6 +11,7 @@ import html as _h
 import json
 import logging
 import os
+import ssl
 import sys
 import time
 import urllib.parse
@@ -33,7 +34,15 @@ V2_TOKEN = os.environ.get("V2_TOKEN", "")
 PAGE_SIZE = 5
 
 
-def _req(url: str, data=None, headers=None, timeout=20, multipart=None):
+# Server o'ziga ulanayotganda hosting self-signed sertifikat beradi —
+# faqat V2_API (o'zimiz) uchun verify o'chirilgan. Telegram himoyalangan.
+try:
+    CTX_UNVERIFIED = ssl._create_unverified_context()
+except Exception:
+    CTX_UNVERIFIED = None
+
+
+def _req(url: str, data=None, headers=None, timeout=20, multipart=None, verify=True):
     if multipart is not None:
         boundary, body = multipart
         headers = {**(headers or {}), "Content-Type": f"multipart/form-data; boundary={boundary}"}
@@ -44,14 +53,15 @@ def _req(url: str, data=None, headers=None, timeout=20, multipart=None):
                                      headers={**(headers or {}), "Content-Type": "application/json"})
     else:
         req = urllib.request.Request(url, headers=headers or {})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    kw = {} if verify else {"context": CTX_UNVERIFIED}
+    with urllib.request.urlopen(req, timeout=timeout, **kw) as r:
         return json.loads(r.read().decode() or "null")
 
 
 def api(method: str, path: str, data=None, timeout=20):
     return _req(V2_API + path, data=data,
                 headers={"Authorization": f"Token {V2_TOKEN}"} if V2_TOKEN else {},
-                timeout=timeout)
+                timeout=timeout, verify=False)
 
 
 def api_upload(path: str, fields: dict, files: dict, timeout=30):
@@ -65,7 +75,7 @@ def api_upload(path: str, fields: dict, files: dict, timeout=30):
         body += (f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"; filename="{fname}"\r\n'
                  f"Content-Type: {ctype}\r\n\r\n").encode() + data + f"\r\n--{boundary}--\r\n".encode()
     return _req(V2_API + path, headers={"Authorization": f"Token {V2_TOKEN}"} if V2_TOKEN else {},
-                multipart=(boundary, body), timeout=timeout)
+                multipart=(boundary, body), timeout=timeout, verify=False)
 
 
 def tg(method: str, payload: dict, timeout=20):
@@ -372,7 +382,7 @@ def handle_check(cid: int, msg: dict) -> bool:
         url = V2_API + "/receipts/"
         req = urllib.request.Request(url, data=body,
                                      headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with urllib.request.urlopen(req, timeout=30, context=CTX_UNVERIFIED) as r:
             res = json.loads(r.read().decode())
         if not res.get("ok"):
             raise RuntimeError(res.get("error", "xato"))
