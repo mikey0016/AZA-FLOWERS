@@ -271,11 +271,18 @@ def handle_user_start(cid: int, oid_raw: str):
     except ValueError:
         reply(cid, USER_WELCOME)
         return
+    log.info("link try oid=%s chat=%s", oid, cid)
     try:
         api("POST", "/staff/bot/link/", {"order_id": oid, "tg_user": cid})
+    except Exception as e:
+        log.warning("link fail oid=%s: %s", oid, e)
+        reply(cid, "⛔ Buyurtma topilmadi (bog'lashda xato).")
+        return
+    try:
         o = v2_order(oid)
-    except Exception:
-        reply(cid, "⛔ Buyurtma topilmadi.")
+    except Exception as e:
+        log.warning("order fetch fail oid=%s: %s", oid, e)
+        reply(cid, "⛔ Buyurtma topilmadi (ma'lumot yo'q).")
         return
     if o.get("status") == "awaiting_payment":
         reply(cid, payment_instructions(o, v2_card()))
