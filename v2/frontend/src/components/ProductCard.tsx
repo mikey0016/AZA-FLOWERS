@@ -13,7 +13,9 @@ export default function ProductCard({ p }: { p: Product }) {
   const price = parseFloat(p.price);
   const liked = wish.includes(p.slug);
   const line = cart.find((x) => x.slug === p.slug);
-  const quickCls = "absolute inset-x-0 bottom-0 bg-charcoal/90 text-white text-xs font-semibold tracking-[0.14em] uppercase py-3 translate-y-full group-hover:translate-y-0 transition max-sm:translate-y-0 max-sm:static max-sm:mt-2 max-sm:mx-3 max-sm:rounded-full max-sm:mb-3 disabled:opacity-40";
+  const barCls = "absolute inset-x-0 bottom-0 max-sm:static max-sm:mt-2 max-sm:mx-3 max-sm:rounded-full max-sm:mb-3";
+  const addCls = barCls + " bg-charcoal/90 text-white text-xs font-semibold tracking-[0.14em] uppercase py-3 translate-y-full group-hover:translate-y-0 transition max-sm:translate-y-0 disabled:opacity-40";
+  const stepCls = barCls + " bg-forest text-white flex items-center justify-between px-2 py-1.5 z-[3]";
   return (
     <div className="card group">
       <div className="relative bg-ivory aspect-square overflow-hidden">
@@ -47,12 +49,12 @@ export default function ProductCard({ p }: { p: Product }) {
           <button
             disabled={p.stock <= 0}
             onClick={() => { add({ slug: p.slug, name, price, photo: p.photo, stock: p.stock }); notify("✓ " + t.added); }}
-            className={quickCls}
+            className={addCls}
           >
             {p.stock > 0 ? t.addToCart : t.outOfStock}
           </button>
         ) : (
-          <div className={quickCls + " !bg-forest flex items-center justify-between !py-1.5 px-2 z-[3]"}>
+          <div className={stepCls}>
             <button aria-label="kamaytirish" onClick={() => setQty(p.slug, line.qty - 1)}
               className="w-9 h-9 grid place-items-center text-xl font-bold hover:bg-white/15 rounded-full">−</button>
             <b className="text-sm">{line.qty} dona</b>

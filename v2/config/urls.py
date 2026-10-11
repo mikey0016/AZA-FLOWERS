@@ -27,7 +27,8 @@ def spa_serve(request, path=""):
         except OSError:
             continue
         if str(resolved).startswith(str(SPA_DIR.resolve())) and resolved.is_file():
-            return FileResponse(open(resolved, "rb"))
+            return FileResponse(open(resolved, "rb"),
+                                headers={"Cache-Control": "no-store, max-age=0"})
     raise Http404
 
 
