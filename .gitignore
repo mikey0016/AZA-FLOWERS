@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+# Jonli maxfiy/foydalanuvchi ma'lumotlari — hech qachon commit qilinmasin:
+telegram.json
+telegram_chats.json
+telegram_offset.txt
+users.json
+orders.json
+sessions.json
+products.json
+promos.json
+payment.json
+docs/data.json
