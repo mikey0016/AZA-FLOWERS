@@ -56,19 +56,21 @@ def list_promos(base: Path) -> dict:
 def check_promo(base: Path, code: str) -> dict:
     code = (code or "").strip().upper()
     if not code:
-        return {"ok": False, "error": "Promokod kiritilmadi"}
+        return {"ok": False, "error": "kod kiritilmagan"}
     p = _promos(base).get(code)
-    if not p or not p.get("active", 1):
-        return {"ok": False, "error": "Promokod topilmadi"}
+    if not p:
+        return {"ok": False, "error": "bunday promokod yo'q"}
+    if not p.get("active", 1):
+        return {"ok": False, "error": "promokod o'chirilgan"}
     try:
         pct = int(p.get("pct", 0))
     except (ValueError, TypeError):
         pct = 0
     if pct < 1 or pct > 90:
-        return {"ok": False, "error": "Promokod yaroqsiz"}
+        return {"ok": False, "error": "promokod yaroqsiz"}
     max_u = int(p.get("max_uses", 0) or 0)
     if max_u and int(p.get("used", 0) or 0) >= max_u:
-        return {"ok": False, "error": "Promokod muddati tugagan"}
+        return {"ok": False, "error": "promokod tugagan"}
     return {"ok": True, "code": code, "pct": pct}
 
 
@@ -84,11 +86,11 @@ def use_promo(base: Path, code: str) -> None:
 
 def add_promo(base: Path, code: str, pct: int, max_uses: int = 0) -> dict:
     code = (code or "").strip().upper()
-    if not code:
-        raise ValueError("Kod bo'sh")
+    if not (3 <= len(code) <= 20 and code.replace("-", "").replace("_", "").isalnum()):
+        raise ValueError("kod 3-20 belgi (harf/raqam) bo'lsin")
     pct = int(pct)
     if pct < 1 or pct > 90:
-        raise ValueError("Foiz 1–90 oralig'ida bo'lsin")
+        raise ValueError("Foiz butun son bo'lsin (1-90)")
     promos = _promos(base)
     promos[code] = {"pct": pct, "max_uses": int(max_uses or 0), "used": 0, "active": 1}
     _save(base, "promos.json", promos)

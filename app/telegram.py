@@ -127,46 +127,38 @@ def _fm(n: int) -> str:
 
 
 def order_text(o: dict) -> str:
+    from app.bot import st_label as _st
     DIV = "━━━━━━━━━━━━"
     no = o.get("no") or f"AZA-{o['id']}"
-    st = o.get("status", "yangi")
+    lines = "\n".join(f"{i}. {_h.escape(ln['name'])} × {ln['qty']} = {_fm(ln['total'])}"
+                      for i, ln in enumerate(o.get("lines", []) or [], 1)) or "—"
     parts = [
-        f"🧾 <b>Buyurtma {no} · #{o['id']}</b>",
-        st,
-        f"{DIV}",
-        "👤 <b>Mijoz</b>",
-        f"Ism: {_h.escape(o['name'])}",
-        f"Tel: <code>{_h.escape(o['phone'])}</code>",
-        f"Manzil: {_h.escape(o['address'])}",
+        f"🛍 <b>Buyurtma {no}</b> · <code>#{o['id']}</code>",
+        _st(o.get("status", "yangi")),
+        f"<i>📦 Manba: {_h.escape(o.get('source', 'sayt'))}</i>",
+        DIV,
+        "<b>👤 Mijoz</b>",
+        "",
+        f"<b>Ism:</b> {_h.escape(o.get('name', ''))}",
+        f"<b>Tel:</b> <code>{_h.escape(o.get('phone', ''))}</code>",
+        f"<b>Manzil:</b> {_h.escape(o.get('address', ''))}",
     ]
     if o.get("lat") and o.get("lon"):
-        parts.append(f"🗺 Xarita: <a href=\"https://maps.google.com/?q={o['lat']},{o['lon']}\">ochish</a>")
-    if o.get("ship_label"):
-        parts.append(f"Yetkazish: {_h.escape(o['ship_label'])}")
-    if o.get("pay_label"):
-        parts.append(f"To'lov: {_h.escape(o['pay_label'])}")
-    if o.get("note"):
-        parts.append(f"Izoh: <i>{_h.escape(o['note'])}</i>")
-    if o.get("comment"):
-        parts.append(f"💬 Izoh: {_h.escape(o['comment'])}")
-    parts += [f"{DIV}", "🧾 <b>Tarkib</b>"]
-    for i, ln in enumerate(o["lines"], 1):
-        parts.append(f"<pre>{i}. {_h.escape(ln['name'])} × {ln['qty']} = {_fm(ln['total'])}</pre>")
-    parts += [
-        f"{DIV}",
-        "💰 <b>Hisob</b>",
-        f"Mahsulotlar: {_fm(o.get('subtotal', o['total']))} so'm",
-    ]
+        parts.append(f"🗺 <b>Xarita:</b> <a href=\"https://maps.google.com/?q={o['lat']},{o['lon']}\">ochish</a>")
+    parts.append(f"<b>Yetkazish:</b> {_h.escape(o.get('ship_label', 'Standart'))}")
+    parts.append(f"<b>To'lov:</b> {_h.escape(o.get('pay_label', 'Naqd'))}")
+    parts.append(f"<b>Izoh:</b> <i>{_h.escape(o.get('note') or o.get('comment') or '—')}</i>")
+    parts += [DIV, "<b>🧾 Tarkib</b>", "", f"<pre>{_h.escape(lines)}</pre>", DIV, "<b>💰 Hisob</b>", "",
+              f"Mahsulotlar: {_fm(o.get('subtotal', o.get('total', 0)))} so'm"]
     if o.get("discount"):
-        parts.append(f"🎟 Chegirma: −{_fm(o['discount'])} so'm")
-    parts.append(f"Yetkazish: {_fm(o.get('ship_cost', 0))} so'm" if o.get("ship_cost") else "Yetkazish: Yandex'ga alohida")
-    parts.append(f"💰 <b>Jami: {_fm(o['total'])} so'm</b>")
+        parts.append(f"🎟 <b>Chegirma:</b> −{_fm(o['discount'])} so'm")
+    parts.append(f"Yetkazish: {_fm(o.get('ship_cost', 0))} so'm" if o.get("ship_cost") else "Yetkazish: Bepul")
+    parts.append(f"💰 <b>Jami: {_fm(o.get('total', 0))} so'm</b>")
     if o.get("promo"):
-        parts.append(f"🎟 Promo: <code>{_h.escape(o['promo'])}</code> (−{o.get('discount_pct', 0)}%)")
+        parts.append(f"🎟 <b>Promo:</b> <code>{_h.escape(o['promo'])}</code> (−{o.get('discount_pct') or '?'}%)")
     if o.get("prepay") is not None:
-        parts.append(f"💳 Oldindan: {_fm(o['prepay'])} so'm")
-        parts.append(f"💵 Qolgan: {_fm(o['total'] - o['prepay'])} so'm")
-    parts.append(f"🕒 {o['created_at']}")
+        parts.append(f"💳 <b>Oldindan 50%:</b> <b>{_fm(o['prepay'])}</b>")
+        parts.append(f"💵 <b>Qolgan:</b> {_fm(o.get('total', 0) - o['prepay'])}")
     return "\n".join(parts)
 
 

@@ -172,6 +172,7 @@ async def create_order(o: OrderIn, bg: BackgroundTasks, request: Request):
         "comment": (o.comment or "").strip(),
         "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         "status": "yangi",
+        "source": "sayt",
         "accepted_by": None,
         **totals,
     }
@@ -231,7 +232,7 @@ async def create_order2(o: OrderNew, bg: BackgroundTasks, request: Request):
     if o.lat and o.lon and addr and "xaritada" not in addr:
         addr += " (xaritada belgilangan 📍)"
     order = {
-        "id": oid, "no": f"AZA-{oid}",
+        "id": oid, "no": f"AZA-{oid}", "source": "sayt",
         "user_id": u["id"] if u else None,
         "name": o.name.strip(), "phone": o.phone.strip(),
         "address": addr.strip(), "note": (o.note or "").strip(),
