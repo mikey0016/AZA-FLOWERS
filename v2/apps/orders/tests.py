@@ -64,6 +64,32 @@ class OrderFlowTest(TestCase):
         with self.assertRaises(OrderError):
             mkorder(promo="YOQ")
 
+    def test_geo_reverse(self):
+        import apps.orders.geocode as g
+        from unittest.mock import patch
+
+        class FakeResp:
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def read(self):
+                import json as j
+                return j.dumps({"display_name": "X", "address": {
+                    "road": "Bunyodkor", "house_number": "12",
+                    "district": "Chilonzor Tumani", "city": "Toshkent",
+                    "ISO3166-2-lvl4": "UZ-TK"}}).encode()
+
+        c = APIClient()
+        bad = c.get("/api/v2/geo/reverse/?lat=xx&lon=1")
+        self.assertEqual(bad.status_code, 400)
+        with patch.object(g.urllib.request, "urlopen", return_value=FakeResp()):
+            g._cache.clear()
+            r = c.get("/api/v2/geo/reverse/?lat=41.3&lon=69.2")
+            self.assertEqual(r.status_code, 200)
+            self.assertEqual(r.data["road"], "Bunyodkor")
+            self.assertEqual(r.data["iso"], "UZ-TK")
+            r2 = c.get("/api/v2/geo/reverse/?lat=41.3&lon=69.2")
+            self.assertEqual(r2.data["road"], "Bunyodkor")
+
     def test_bot_pending_and_link(self):
         admin = User.objects.create_superuser("root", "r@r.uz", "pass12345")
         c = APIClient()

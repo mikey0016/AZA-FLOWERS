@@ -18,7 +18,10 @@ export default function CheckoutMap({ onPick }: { onPick: (p: Pick) => void }) {
       const L = (await import("leaflet")).default;
       if (!alive || !ref.current || box.current) return;
       const map = L.map(ref.current).setView([41.3111, 69.2797], 12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      }).addTo(map);
       const icon = L.divIcon({
         html: "<div style='font-size:28px;line-height:1'>📍</div>",
         className: "",

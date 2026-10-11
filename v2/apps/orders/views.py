@@ -89,6 +89,27 @@ class BotPendingView(generics.ListAPIView):
             .order_by("-id")[:20])
 
 
+class GeoReverseView(APIView):
+    """Xarita nuqtasi -> manzil (Nominatim proksiysi, kesh bilan)."""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        try:
+            lat = float(request.query_params.get("lat", ""))
+            lon = float(request.query_params.get("lon", ""))
+        except (TypeError, ValueError):
+            return Response({"ok": False, "error": "Koordinata xato"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            return Response({"ok": False, "error": "Koordinata xato"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        from apps.orders.geocode import reverse_geocode
+        try:
+            return Response(reverse_geocode(lat, lon))
+        except Exception:
+            return Response({"ok": False, "error": "Topilmadi"})
+
+
 class BotLinkView(APIView):
     """Mijoz chat_id ni buyurtmaga bog'lash (/start ord_ID). Staff only."""
     permission_classes = [permissions.IsAdminUser]

@@ -45,17 +45,25 @@ export default function CheckoutPage() {
     setLoc(p);
     setLocating(true);
     try {
-      const r = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${p.lat}&lon=${p.lon}&accept-language=uz,ru`
-      );
-      const j = await r.json();
-      const a = j.address || {};
+      let a: Record<string, string> = {};
+      try {
+        const r = await fetch(`/api/v2/geo/reverse/?lat=${p.lat}&lon=${p.lon}`);
+        const j = await r.json();
+        if (j.ok) a = j;
+        else throw new Error("proxy");
+      } catch {
+        const r = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${p.lat}&lon=${p.lon}&accept-language=uz,ru`
+        );
+        const j = await r.json();
+        a = j.address || {};
+      }
       const addr = [a.road || "", a.house_number || ""].filter(Boolean).join(", ")
         || a.suburb || a.neighbourhood || a.quarter || a.district || a.city || a.town || a.village || "";
       if (addr) setAddress(addr);
       const dist = a.suburb || a.city_district || a.district || a.neighbourhood || a.quarter || a.town || a.village || "";
       if (dist) setCity(dist);
-      const iso = ISO_REG[a["ISO3166-2-lvl4"] || ""];
+      const iso = ISO_REG[a["ISO3166-2-lvl4"] || a.iso || ""];
       if (iso) { setRegion(iso); return; }
       const n = normW(a.state || a.county || a.city || "").replace(/[^a-z ]/g, "");
       for (const o of REGIONS) {
@@ -95,7 +103,7 @@ export default function CheckoutPage() {
   const advance = pay === "card" ? total : Math.round(total / 2);
   const rest = total - advance;
 
-  if (cart.length === 0) {
+  if (cart.length === 0 && !done) {
     return (
       <div className="container-x py-16 text-center">
         <h1 className="h-serif text-4xl">Savat bo&apos;sh</h1>
@@ -175,6 +183,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
+      {!done && (<>
       <div className="bg-white border border-beige rounded-2xl p-5 mt-6">
         <h3 className="font-bold mb-3">Tarkib</h3>
         {cart.map((i) => (
@@ -248,6 +257,7 @@ export default function CheckoutPage() {
         {busy ? "Yuborilmoqda..." : `Tasdiqlash · ${uzs(total)} (oldindan ${uzs(advance)})`}
       </button>
       <p className="text-xs text-stone-400 text-center mt-3">🔒 Ma&apos;lumotlar xavfsiz saqlanadi</p>
+      </>)}
     </div>
   );
 }
