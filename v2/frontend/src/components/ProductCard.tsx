@@ -8,10 +8,12 @@ import FlowerArt from "./FlowerArt";
 
 export default function ProductCard({ p }: { p: Product }) {
   const { t, lang } = useLang();
-  const { add, wish, toggleWish, notify } = useShop();
+  const { cart, add, setQty, wish, toggleWish, notify } = useShop();
   const name = lang === "ru" && p.name_ru ? p.name_ru : p.name_uz;
   const price = parseFloat(p.price);
   const liked = wish.includes(p.slug);
+  const line = cart.find((x) => x.slug === p.slug);
+  const quickCls = "absolute inset-x-0 bottom-0 bg-charcoal/90 text-white text-xs font-semibold tracking-[0.14em] uppercase py-3 translate-y-full group-hover:translate-y-0 transition max-sm:translate-y-0 max-sm:static max-sm:mt-2 max-sm:mx-3 max-sm:rounded-full max-sm:mb-3 disabled:opacity-40";
   return (
     <div className="card group">
       <div className="relative bg-ivory aspect-square overflow-hidden">
@@ -41,13 +43,23 @@ export default function ProductCard({ p }: { p: Product }) {
         >
           {liked ? "♥" : "♡"}
         </button>
-        <button
-          disabled={p.stock <= 0}
-          onClick={() => { add({ slug: p.slug, name, price, photo: p.photo, stock: p.stock }); notify("✓ " + t.added); }}
-          className="absolute inset-x-0 bottom-0 bg-charcoal/90 text-white text-xs font-semibold tracking-[0.14em] uppercase py-3 translate-y-full group-hover:translate-y-0 transition max-sm:translate-y-0 max-sm:static max-sm:mt-2 max-sm:mx-3 max-sm:rounded-full max-sm:mb-3 disabled:opacity-40"
-        >
-          {p.stock > 0 ? t.addToCart : t.outOfStock}
-        </button>
+        {!line || line.qty <= 0 ? (
+          <button
+            disabled={p.stock <= 0}
+            onClick={() => { add({ slug: p.slug, name, price, photo: p.photo, stock: p.stock }); notify("✓ " + t.added); }}
+            className={quickCls}
+          >
+            {p.stock > 0 ? t.addToCart : t.outOfStock}
+          </button>
+        ) : (
+          <div className={quickCls + " !bg-forest flex items-center justify-between !py-1.5 px-2 z-[3]"}>
+            <button aria-label="kamaytirish" onClick={() => setQty(p.slug, line.qty - 1)}
+              className="w-9 h-9 grid place-items-center text-xl font-bold hover:bg-white/15 rounded-full">−</button>
+            <b className="text-sm">{line.qty} dona</b>
+            <button aria-label="ko'paytirish" onClick={() => setQty(p.slug, Math.min(p.stock || 50, line.qty + 1))}
+              className="w-9 h-9 grid place-items-center text-xl font-bold hover:bg-white/15 rounded-full">+</button>
+          </div>
+        )}
       </div>
       <div className="p-4 flex flex-col gap-1.5">
         <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-forest/70">{p.category.name_uz}</div>
