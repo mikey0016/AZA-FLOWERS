@@ -108,7 +108,7 @@ function TrackInner() {
             <h4 className="font-semibold text-sm">Yoki Telegram bot orqali (eski tizim) ✈</h4>
             <p className="text-xs text-stone-500">Botga kiring, <b>{uzs(order.payment.required_amount)}</b> ni to&apos;lang va chekni rasm qilib yuboring.</p>
             <a className="btn btn-primary" target="_blank" rel="noopener"
-              href={`https://t.me/azaflowersbot?start=ord_${order.id}`}>
+              href={`https://t.me/faxfloresbot?start=ord_${order.id}`}>
               ✈ Botga o&apos;tish va chek yuborish
             </a>
           </div>

@@ -7,7 +7,7 @@ import { useShop } from "@/lib/shop";
 import { useAuth, authHeaders } from "@/lib/auth";
 import CheckoutMap from "@/components/CheckoutMap";
 
-const BOT_USERNAME = "azaflowersbot";
+const BOT_USERNAME = "faxfloresbot";
 
 const ISO_REG: Record<string, string> = {
   "UZ-TK": "Toshkent shahri", "UZ-TO": "Toshkent viloyati", "UZ-SA": "Samarqand",
