@@ -17,8 +17,13 @@ V1 = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
 class Command(BaseCommand):
     help = "v1 JSON (products/orders/promos/payment) -> v2 DB"
 
+    def add_arguments(self, parser):
+        parser.add_argument("--v1-dir", default=None,
+                            help="v1 loyiha ildizi (orders.json shu yerda)")
+
     def handle(self, *args, **opts):
-        sys.path.insert(0, str(V1))
+        v1dir = Path(opts["v1_dir"]) if opts["v1_dir"] else V1
+        sys.path.insert(0, str(v1dir))
         from app.seed import CATEGORIES, PRODUCTS
 
         from apps.orders.models import Order, OrderItem
@@ -48,7 +53,7 @@ class Command(BaseCommand):
             self.stdout.write(f"mahsulot (yangi): {n}")
 
             try:
-                orders = json.loads((V1 / "orders.json").read_text(encoding="utf-8"))
+                orders = json.loads((v1dir / "orders.json").read_text(encoding="utf-8"))
             except Exception:
                 orders = []
             status_map = {"yangi": Order.STATUS_NEW, "qabul": Order.STATUS_CONFIRMED,
@@ -89,7 +94,7 @@ class Command(BaseCommand):
             self.stdout.write(f"buyurtma (yangi): {m}")
 
             try:
-                promos = json.loads((V1 / "promos.json").read_text(encoding="utf-8"))
+                promos = json.loads((v1dir / "promos.json").read_text(encoding="utf-8"))
             except Exception:
                 promos = {}
             for code, p in promos.items():
@@ -101,7 +106,7 @@ class Command(BaseCommand):
             self.stdout.write(f"promokod: {len(promos)}")
 
             try:
-                pay = json.loads((V1 / "payment.json").read_text(encoding="utf-8"))
+                pay = json.loads((v1dir / "payment.json").read_text(encoding="utf-8"))
                 s = PaymentSettings.current()
                 s.card_number = pay.get("pay_card", "")
                 s.cash_advance_pct = pay.get("prepay_pct", 50)
