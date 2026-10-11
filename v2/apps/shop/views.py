@@ -29,6 +29,8 @@ class ProductList(generics.ListAPIView):
             qs = qs.order_by("-price")
         elif sort == "new":
             qs = qs.order_by("-created_at")
+        elif sort == "discount":
+            qs = sorted(qs, key=lambda x: -x.discount_pct)
         return qs
 
 

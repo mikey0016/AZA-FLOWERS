@@ -14,6 +14,20 @@ py -3 v2/manage.py test apps.orders apps.payments
 py -3 v2/manage.py runserver          # http://127.0.0.1:8000/admin/
 ```
 
+## Frontend (Next.js mijoz vitrinasi)
+
+```powershell
+cd v2/frontend
+npm install
+npm run dev                        # http://127.0.0.1:3000 (API: 8000 dagi Django)
+npm run build                      # production tekshiruvi
+```
+
+`API_URL` env (server tomonda) backend manzilini beradi, brauzerda `/api/v2/*`
+so'rovlar Next.js rewrite orqali Django'ga proksilanadi (CORS muammosi yo'q).
+Sahifalar: `/`, `/shop`, `/product/[slug]`, `/wishlist`, `/checkout`,
+`/track`, `/about`, `/contact`. UZ/RU almashtirgich header'da.
+
 Linux:
 ```bash
 python3 -m pip install -r v2/requirements.txt

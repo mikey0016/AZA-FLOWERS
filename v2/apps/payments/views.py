@@ -102,3 +102,19 @@ class CouponViewSet(viewsets.ModelViewSet):
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
     permission_classes = [permissions.IsAdminUser]
+
+
+class CouponValidate(generics.RetrieveAPIView):
+    permission_classes = [permissions.AllowAny]
+
+    def retrieve(self, request, *args, **kwargs):
+        code = (request.query_params.get("code") or "").strip().upper()
+        if not code:
+            return Response({"ok": False, "error": "kod kiritilmagan"})
+        try:
+            c = Coupon.objects.get(code=code, active=True)
+        except Coupon.DoesNotExist:
+            return Response({"ok": False, "error": "bunday promokod yo'q"})
+        if c.max_uses and c.used >= c.max_uses:
+            return Response({"ok": False, "error": "promokod tugagan"})
+        return Response({"ok": True, "code": c.code, "pct": c.pct})

@@ -14,13 +14,30 @@ class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     history = serializers.SerializerMethodField()
     remaining = serializers.SerializerMethodField()
+    payment = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = ["id", "no", "name", "phone", "region", "city", "address", "note",
                   "lat", "lon", "ship_method", "ship_fee", "pay_method",
                   "subtotal", "discount", "total", "status", "items", "history",
-                  "remaining", "created_at"]
+                  "remaining", "payment", "created_at"]
+
+    def get_payment(self, o):
+        try:
+            p = o.payment
+        except Exception:
+            return None
+        data = {"id": p.pk, "method": p.method, "required_amount": str(p.required_amount),
+                "received": str(p.received), "remaining": str(p.remaining),
+                "status": p.status}
+        if p.method == "card":
+            from apps.payments.models import PaymentSettings
+            s = PaymentSettings.current()
+            data["cardholder"] = s.cardholder
+            data["card_number"] = s.card_number
+            data["instructions"] = s.instructions_uz
+        return data
 
     def get_history(self, o):
         return [{"from": h.from_status, "to": h.to_status, "by": h.by,

@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ivory: #faf8f3;
+  --color-forest: #233c32;
+  --color-forest-deep: #182a23;
+  --color-sage: #dce5d8;
+  --color-blush: #ebcfd0;
+  --color-beige: #e8e0d5;
+  --color-charcoal: #262824;
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Manrope", "Segoe UI", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-forest);
+  color: #fff;
+}
+
+.container-x {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.btn-primary {
+  background: var(--color-forest);
+  color: #fff;
+  padding: 14px 32px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.btn-primary:hover {
+  background: var(--color-forest-deep);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: wait;
+  transform: none;
+}
+.btn-outline {
+  border: 1.5px solid var(--color-forest);
+  color: var(--color-forest);
+  padding: 13px 30px;
+  font-size: 14px;
+}
+.btn-outline:hover {
+  background: var(--color-forest);
+  color: #fff;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #4a4a44;
+}
+.field > span {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.field input,
+.field select,
+.field textarea {
+  border: 1px solid var(--color-beige);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--color-charcoal);
+  width: 100%;
+  font-family: inherit;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--color-forest);
+  box-shadow: 0 0 0 3px rgba(35, 60, 50, 0.1);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--color-beige);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 44px rgba(35, 60, 50, 0.12);
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-forest);
+}
+
+.h-serif {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  line-height: 1.15;
+}

@@ -26,6 +26,7 @@ class PublicOrderCreate(generics.CreateAPIView):
         return Response({
             "ok": True, "id": order.id, "no": order.no, "total": str(order.total),
             "prepay": str(pay.required_amount), "status": order.status,
+            "payment_id": pay.pk, "pay_method": order.pay_method,
         }, status=status.HTTP_201_CREATED)
 
 
@@ -37,7 +38,7 @@ class PublicOrderTrack(generics.RetrieveAPIView):
     def get_object(self):
         from django.http import Http404
         try:
-            o = Order.objects.prefetch_related("items", "history").get(pk=self.kwargs["pk"])
+            o = Order.objects.select_related("payment").prefetch_related("items", "history").get(pk=self.kwargs["pk"])
         except Order.DoesNotExist:
             raise Http404
         phone = "".join(ch for ch in str(self.request.query_params.get("phone", "")) if ch.isdigit())
@@ -49,7 +50,7 @@ class PublicOrderTrack(generics.RetrieveAPIView):
 
 class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     """Xodimlar uchun: ro'yxat + batafsil + holat o'tkazish. Faqat staff."""
-    queryset = Order.objects.prefetch_related("items", "history").all()
+    queryset = Order.objects.select_related("payment").prefetch_related("items", "history").all()
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAdminUser]
 
