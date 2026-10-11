@@ -64,6 +64,22 @@ class OrderFlowTest(TestCase):
         with self.assertRaises(OrderError):
             mkorder(promo="YOQ")
 
+    def test_bot_pending_and_link(self):
+        admin = User.objects.create_superuser("root", "r@r.uz", "pass12345")
+        c = APIClient()
+        c.force_authenticate(user=admin)
+        o = mkorder()
+        r = c.get("/api/v2/staff/bot/pending/")
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(any(x["id"] == o.id for x in r.data))
+        r2 = c.post("/api/v2/staff/bot/link/", {"order_id": o.id, "tg_user": 777},
+                    format="json")
+        self.assertEqual(r2.status_code, 200)
+        o.refresh_from_db()
+        self.assertEqual(o.tg_user, 777)
+        # Anonim kira olmaydi
+        self.assertIn(APIClient().get("/api/v2/staff/bot/pending/").status_code, (401, 403))
+
     def test_transition_rules(self):
         o = mkorder()
         with self.assertRaises(OrderError):
@@ -147,10 +163,8 @@ class PaymentFlowTest(TestCase):
 
     def test_unauthorized_api(self):
         c = APIClient()
-        r = c.get("/api/v2/staff/orders/")
-        self.assertEqual(r.status_code, 403)
-        r = c.get("/api/v2/staff/payments/")
-        self.assertEqual(r.status_code, 403)
+        self.assertIn(c.get("/api/v2/staff/orders/").status_code, (401, 403))
+        self.assertIn(c.get("/api/v2/staff/payments/").status_code, (401, 403))
 
     def test_staff_api(self):
         User.objects.create_superuser("admin", "a@a.uz", "pass12345")

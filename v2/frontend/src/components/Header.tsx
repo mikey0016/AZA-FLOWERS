@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLang, type Lang } from "@/lib/i18n";
 import { useShop } from "@/lib/shop";
+import { useAuth } from "@/lib/auth";
 
 const NAV = [
   { uz: "Katalog", ru: "Каталог", href: "/shop" },
@@ -15,6 +16,7 @@ const NAV = [
 export default function Header() {
   const { t, lang, setLang } = useLang();
   const { count, wish } = useShop();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [search, setSearch] = useState(false);
@@ -49,6 +51,10 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-1 ml-auto lg:ml-0">
+          <Link href={user ? "/cabinet" : "/login"} title={t.account}
+            className="w-10 h-10 grid place-items-center text-lg hover:text-forest font-semibold">
+            {user ? user.name.trim()[0].toUpperCase() : "👤"}
+          </Link>
           <button aria-label="search" className="w-10 h-10 grid place-items-center text-xl hover:text-forest" onClick={() => setSearch((s) => !s)}>⌕</button>
           <Link aria-label="wishlist" href="/wishlist" className="relative w-10 h-10 grid place-items-center text-xl hover:text-forest">
             ♡

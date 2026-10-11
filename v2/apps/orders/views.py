@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.orders.models import Order
 from apps.orders.serializers import OrderCreateSerializer, OrderSerializer, OrderStatusSerializer
@@ -75,3 +76,33 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
         except OrderError as e:
             return Response({"ok": False, "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"ok": True, "status": order.status})
+
+
+class BotPendingView(generics.ListAPIView):
+    """Bot uchun: to'lov kutilayotgan buyurtmalar (chek + xarita bilan). Staff only."""
+    permission_classes = [permissions.IsAdminUser]
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        return (Order.objects.select_related("payment").prefetch_related("items").filter(
+            status__in=[Order.STATUS_AWAITING_PAYMENT, Order.STATUS_AWAITING_VERIFY])
+            .order_by("-id")[:20])
+
+
+class BotLinkView(APIView):
+    """Mijoz chat_id ni buyurtmaga bog'lash (/start ord_ID). Staff only."""
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        try:
+            order = Order.objects.get(pk=int(request.data.get("order_id")))
+        except (Order.DoesNotExist, TypeError, ValueError):
+            return Response({"ok": False, "error": "Buyurtma topilmadi"},
+                            status=status.HTTP_404_NOT_FOUND)
+        try:
+            order.tg_user = int(request.data.get("tg_user"))
+        except (TypeError, ValueError):
+            return Response({"ok": False, "error": "tg_user noto'g'ri"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        order.save(update_fields=["tg_user", "updated_at"])
+        return Response({"ok": True, "id": order.id})

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LangProvider } from "@/lib/i18n";
 import { ShopProvider } from "@/lib/shop";
+import { AuthProvider } from "@/lib/auth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "./globals.css";
@@ -24,9 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <LangProvider>
           <ShopProvider>
-            <Header />
-            <main className="min-h-[60vh]">{children}</main>
-            <Footer />
+            <AuthProvider>
+              <Header />
+              <main className="min-h-[60vh]">{children}</main>
+              <Footer />
+            </AuthProvider>
           </ShopProvider>
         </LangProvider>
       </body>

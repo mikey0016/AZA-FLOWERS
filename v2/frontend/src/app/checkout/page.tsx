@@ -1,13 +1,15 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { REGIONS, EXPRESS_FEE, createOrder, validateCoupon } from "@/lib/api";
 import { uzs } from "@/lib/format";
 import { useShop } from "@/lib/shop";
+import { useAuth, authHeaders } from "@/lib/auth";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, subtotal, clear, notify } = useShop();
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [region, setRegion] = useState(REGIONS[0]);
@@ -21,6 +23,26 @@ export default function CheckoutPage() {
   const [promoMsg, setPromoMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      if (!name) setName(user.name);
+      if (!phone) setPhone("+" + user.phone);
+      fetch("/api/v2/addresses/", { headers: authHeaders() })
+        .then((r) => (r.ok ? r.json() : []))
+        .then((list) => {
+          const d = (list || []).find((a: { is_default: boolean }) => a.is_default) || list[0];
+          if (d) {
+            if (d.region) setRegion(d.region);
+            if (!city && d.city) setCity(d.city);
+            if (!address && d.address) setAddress(d.address);
+            if (!note && d.note) setNote(d.note);
+          }
+        })
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const shipFee = ship === "express" ? EXPRESS_FEE : 0;
   const discount = useMemo(() => Math.round(subtotal * pct / 100), [subtotal, pct]);
