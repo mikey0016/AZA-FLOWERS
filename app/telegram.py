@@ -60,6 +60,43 @@ def call_api(base: Path, method: str, payload: dict, timeout: int = 30) -> dict:
     return _api(s["bot_token"], method, payload, timeout=timeout)
 
 
+def send_photo(base: Path, chat_id: int, photo: str, caption: str = "", markup: dict | None = None) -> dict:
+    """Mahsulot rasmini yuborish. http(s) havola bo'lsa to'g'ridan-to'g'ri,
+    lokal fayl (/static/uploads/...) bo'lsa multipart yuklash orqali."""
+    import os
+    s = load_settings(base)
+    if not s["bot_token"]:
+        raise RuntimeError("Telegram bot token sozlanmagan")
+    if photo.startswith("http"):
+        payload = {"chat_id": chat_id, "photo": photo, "caption": caption, "parse_mode": "HTML"}
+        if markup is not None:
+            payload["reply_markup"] = json.dumps(markup)
+        return _api(s["bot_token"], "sendPhoto", payload, timeout=30)
+    rel = photo[1:] if photo.startswith("/") else photo
+    if rel.startswith("static/"):
+        rel = rel[len("static/"):]
+    fpath = base / "static" / rel if not rel.startswith("uploads/") else base / "static" / rel
+    if not fpath.exists():
+        fpath = base / rel
+    boundary = f"aza{int(time.time() * 1000)}"
+    fields = {"chat_id": str(chat_id), "parse_mode": "HTML", "caption": caption}
+    if markup is not None:
+        fields["reply_markup"] = json.dumps(markup)
+    body = b""
+    for k, v in fields.items():
+        body += (f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n").encode()
+    with open(fpath, "rb") as f:
+        data = f.read()
+    body += (f"--{boundary}\r\nContent-Disposition: form-data; name=\"photo\"; "
+             f"filename=\"{os.path.basename(str(fpath))}\"\r\nContent-Type: image/jpeg\r\n\r\n").encode()
+    body += data + f"\r\n--{boundary}--\r\n".encode()
+    url = f"https://api.telegram.org/bot{s['bot_token']}/sendPhoto"
+    req = urllib.request.Request(url, data=body,
+                                 headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.loads(r.read().decode())
+
+
 def get_updates(base: Path) -> list[dict]:
     """Botga yozgan odamlar ro'yxati (chat ID aniqlash uchun)."""
     s = load_settings(base)
@@ -90,30 +127,34 @@ def _fm(n: int) -> str:
 
 
 def order_text(o: dict) -> str:
+    DIV = "━━━━━━━━━━━━"
     no = o.get("no") or f"AZA-{o['id']}"
     st = o.get("status", "yangi")
     parts = [
         f"🧾 <b>Buyurtma {no} · #{o['id']}</b>",
-        f"Holati: {st}",
-        f"👤 Ism: {_h.escape(o['name'])}",
-        f"📞 Tel: {_h.escape(o['phone'])}",
-        f"📍 Manzil: {_h.escape(o['address'])}",
+        st,
+        f"{DIV}",
+        "👤 <b>Mijoz</b>",
+        f"Ism: {_h.escape(o['name'])}",
+        f"Tel: <code>{_h.escape(o['phone'])}</code>",
+        f"Manzil: {_h.escape(o['address'])}",
     ]
-    if o.get("ship_label"):
-        parts.append(f"🚚 Yetkazish: {_h.escape(o['ship_label'])}")
-    if o.get("pay_label"):
-        parts.append(f"💳 To'lov: {_h.escape(o['pay_label'])}")
-    if o.get("note"):
-        parts.append(f"📝 Izoh: {_h.escape(o['note'])}")
     if o.get("lat") and o.get("lon"):
         parts.append(f"🗺 Xarita: <a href=\"https://maps.google.com/?q={o['lat']},{o['lon']}\">ochish</a>")
+    if o.get("ship_label"):
+        parts.append(f"Yetkazish: {_h.escape(o['ship_label'])}")
+    if o.get("pay_label"):
+        parts.append(f"To'lov: {_h.escape(o['pay_label'])}")
+    if o.get("note"):
+        parts.append(f"Izoh: <i>{_h.escape(o['note'])}</i>")
     if o.get("comment"):
         parts.append(f"💬 Izoh: {_h.escape(o['comment'])}")
-    parts.append("")
+    parts += [f"{DIV}", "🧾 <b>Tarkib</b>"]
     for i, ln in enumerate(o["lines"], 1):
-        parts.append(f"{i}. {_h.escape(ln['name'])} × {ln['qty']} — {_fm(ln['total'])} so'm")
+        parts.append(f"<pre>{i}. {_h.escape(ln['name'])} × {ln['qty']} = {_fm(ln['total'])}</pre>")
     parts += [
-        "",
+        f"{DIV}",
+        "💰 <b>Hisob</b>",
         f"Mahsulotlar: {_fm(o.get('subtotal', o['total']))} so'm",
     ]
     if o.get("discount"):

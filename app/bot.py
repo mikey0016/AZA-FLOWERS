@@ -35,6 +35,9 @@ HELP = (
     "/panel — inline admin panel\n"
     "/orders — buyurtmalar (tugmalar bilan)\n"
     "/myorders — mijoz buyurtmalari (tg bog'langan bo'lsa)\n"
+    "/products — mahsulotlar\n"
+    "/add — yangi gul (yoki /addproduct, /mahsulot)\n"
+    "/delproduct SLUG — o'chirish\n"
     "/stats — statistika\n"
     "/products — mahsulotlar ro'yxati\n"
     "/delproduct SLUG — mahsulotni o'chirish\n"
@@ -58,6 +61,11 @@ USER_HELP = (
 
 def _fm(n: int) -> str:
     return f"{n:,}".replace(",", " ")
+
+
+def pretty_card(card: str) -> str:
+    d = "".join(ch for ch in str(card or "") if ch.isdigit())
+    return " ".join(d[i:i + 4] for i in range(0, len(d), 4)) or str(card or "")
 
 
 def norm(u: str) -> str:
@@ -238,7 +246,7 @@ def handle_message(base: Path, msg: dict) -> None:
         return
     elif text == "🌷 Mahsulotlar" or text in ("/mahsulotlar", "/products"):
         send_product_list(base, cid)
-    elif text == "/add":
+    elif text in ("/add", "/addproduct", "/mahsulot"):
         pending[cid] = {"op": "add", "step": "name", "data": {}}
         reply(base, cid, "➕ <b>Yangi gul</b>\n1/7 — Gul nomini yuboring:")
     elif text == "🧾 So'nggi buyurtmalar":
@@ -477,7 +485,15 @@ def handle_product_callback(base: Path, cb: dict) -> None:
         if not p:
             answer("Topilmadi")
             return
-        edit_to(base, cid, mid, product_detail_text(p), detail_markup(p))
+        sent_photo = False
+        if p.get("photo"):
+            try:
+                tg.send_photo(base, cid, p["photo"], product_detail_text(p), detail_markup(p))
+                sent_photo = True
+            except Exception as e:
+                log.warning("foto yuborilmadi: %s", e)
+        if not sent_photo:
+            edit_to(base, cid, mid, product_detail_text(p), detail_markup(p))
         answer(p["name"][:40])
     elif parts[0] == "e" and len(parts) == 3:
         _, field, slug = parts
@@ -969,7 +985,8 @@ def card_text(base: Path) -> str:
     from app import payments as paymod
     pay = paymod.get_payment(base)
     card = pay.get("pay_card") or "—"
-    return (f"💳 <b>To'lov kartasi:</b>\n<code>{_h.escape(card)}</code>\n"
+    shown = pretty_card(card) if card != "—" else card
+    return (f"💳 <b>To'lov kartasi:</b>\n<code>{_h.escape(shown)}</code>\n"
             f"Oldindan to'lov: {pay.get('prepay_pct', 50)}%\n\n"
             "O'zgartirish: <code>/setcard 8600123456789012</code>")
 
@@ -982,7 +999,7 @@ def payment_instructions(base: Path, o: dict) -> str:
     prepay = o.get("prepay")
     if prepay is None:
         prepay = round(o.get("total", 0) * pct / 100)
-    card_block = f"<code>{_h.escape(card)}</code>" if card else "Karta raqamini operatorimiz yuboradi."
+    card_block = f"<code>{_h.escape(pretty_card(card))}</code>" if card else "Karta raqamini operatorimiz yuboradi."
     return (
         f"🧾 Buyurtma {o.get('no', '')}\n"
         f"💰 Jami: {_fm(o.get('total', 0))} so'm\n"
@@ -1023,6 +1040,9 @@ def handle_check(base: Path, cid: int, msg: dict) -> bool:
         return False
     try:
         if is_admin(base, cid, (msg.get("from") or {}).get("username", "")):
+            if msg.get("photo"):
+                reply(base, cid, "ℹ️ Chekni mijoz yuboradi.")
+                return True
             return False
     except Exception:
         pass
@@ -1033,7 +1053,8 @@ def handle_check(base: Path, cid: int, msg: dict) -> bool:
     o = next((x for x in orders[::-1]
               if x.get("tg_user") == cid and x.get("status") in ("awaiting_payment", "yangi")), None)
     if not o:
-        return False
+        reply(base, cid, "📭 To'lov kutilayotgan buyurtmangiz topilmadi.\nSaytdan buyurtma bering: azaflowers.uz")
+        return True
     if o.get("prepay") is None:
         o["prepay"] = round(o.get("total", 0) / 2)
     file_id = photos[-1].get("file_id")
