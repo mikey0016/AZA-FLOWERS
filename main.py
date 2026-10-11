@@ -23,6 +23,10 @@ STATIC_DIR = BASE_DIR / "static"
 ORDERS_FILE = BASE_DIR / "orders.json"
 STATIC_DIR.mkdir(exist_ok=True)
 
+def page(name: str) -> FileResponse:
+    """HTML sahifalar keshlanmasin — har doim yangi versiya."""
+    return FileResponse(STATIC_DIR / name, headers={"Cache-Control": "no-store, max-age=0"})
+
 # SAMA uslubidagi to'lov: viloyatlar + yetkazish turlari
 REGIONS = ["Toshkent shahri", "Toshkent viloyati", "Samarqand", "Buxoro", "Andijon",
            "Farg'ona", "Namangan", "Qashqadaryo", "Surxondaryo", "Xorazm",
@@ -329,44 +333,44 @@ async def track_order(order_id: int, phone: str):
 # --- pages ---
 @app.get("/about")
 async def page_about():
-    return FileResponse(STATIC_DIR / "about.html")
+    return page("about.html")
 
 @app.get("/track")
 async def page_track():
-    return FileResponse(STATIC_DIR / "track.html")
+    return page("track.html")
 
 @app.get("/cabinet")
 async def page_cabinet():
-    return FileResponse(STATIC_DIR / "cabinet.html")
+    return page("cabinet.html")
 
 @app.get("/shop")
 async def page_shop():
-    return FileResponse(STATIC_DIR / "shop.html")
+    return page("shop.html")
 
 @app.get("/sale")
 async def page_sale():
-    return FileResponse(STATIC_DIR / "sale.html")
+    return page("sale.html")
 
 @app.get("/product/{slug}")
 async def page_product(slug: str):
-    return FileResponse(STATIC_DIR / "product.html")
+    return page("product.html")
 
 @app.get("/wishlist")
 async def page_wishlist():
-    return FileResponse(STATIC_DIR / "wishlist.html")
+    return page("wishlist.html")
 
 @app.get("/checkout")
 async def page_checkout():
-    return FileResponse(STATIC_DIR / "checkout.html")
+    return page("checkout.html")
 
 @app.get("/contact")
 async def page_contact():
-    return FileResponse(STATIC_DIR / "contact.html")
+    return page("contact.html")
 
 # --- frontend ---
 @app.get("/")
 async def index():
-    return FileResponse(STATIC_DIR / "index.html")
+    return page("index.html")
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
