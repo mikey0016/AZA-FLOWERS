@@ -1,10 +1,11 @@
 function apiBase(): string {
-  if (typeof window !== "undefined") return "";
+  if (typeof window !== "undefined") return process.env.NEXT_PUBLIC_API_URL || "";
   return process.env.API_URL || "http://127.0.0.1:8000";
 }
 
 async function j<T>(path: string, init?: RequestInit): Promise<T> {
-  const r = await fetch(apiBase() + path, { cache: "no-store", ...init });
+  const r = await fetch(apiBase() + path,
+    typeof window !== "undefined" ? { cache: "no-store", ...init } : init);
   const data = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error((data as { error?: string }).error || `HTTP ${r.status}`);
   return data as T;
@@ -116,7 +117,7 @@ export const validateCoupon = (code: string) =>
   );
 
 export async function uploadReceipt(fd: FormData): Promise<{ ok: boolean; receipt?: unknown; error?: string }> {
-  const base = typeof window !== "undefined" ? "" : process.env.API_URL || "http://127.0.0.1:8000";
+  const base = typeof window !== "undefined" ? process.env.NEXT_PUBLIC_API_URL || "" : process.env.API_URL || "http://127.0.0.1:8000";
   const r = await fetch(base + "/api/v2/receipts/", { method: "POST", body: fd });
   return r.json();
 }

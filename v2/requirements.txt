@@ -1,5 +1,7 @@
 Django>=5.2,<6.0
 djangorestframework>=3.15
-# Production (PostgreSQL + MinIO) — uncomment when deploying to VPS:
+whitenoise>=6.0
+gunicorn>=22.0
+# VPS/PostgreSQL/MinIO (keyingi bosqich):
 # psycopg[binary]>=3.1
-# django-minio-storage>=0.5  # or django-storages[s3]>=1.14
+# django-storages[s3]>=1.14
