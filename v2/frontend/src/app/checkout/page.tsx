@@ -5,6 +5,18 @@ import { REGIONS, EXPRESS_FEE, createOrder, validateCoupon } from "@/lib/api";
 import { uzs } from "@/lib/format";
 import { useShop } from "@/lib/shop";
 import { useAuth, authHeaders } from "@/lib/auth";
+import CheckoutMap from "@/components/CheckoutMap";
+
+const ISO_REG: Record<string, string> = {
+  "UZ-TK": "Toshkent shahri", "UZ-TO": "Toshkent viloyati", "UZ-SA": "Samarqand",
+  "UZ-BU": "Buxoro", "UZ-AN": "Andijon", "UZ-FA": "Farg'ona", "UZ-NG": "Namangan",
+  "UZ-QA": "Qashqadaryo", "UZ-SU": "Surxondaryo", "UZ-XO": "Xorazm",
+  "UZ-NW": "Navoiy", "UZ-JI": "Jizzax", "UZ-SI": "Sirdaryo", "UZ-QR": "Qoraqalpog'iston",
+};
+
+function normW(x: string) {
+  return (x || "").toLowerCase().replace(/['ʼ`]/g, "");
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -23,6 +35,36 @@ export default function CheckoutPage() {
   const [promoMsg, setPromoMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [loc, setLoc] = useState<{ lat: number; lon: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+
+  const onPick = async (p: { lat: number; lon: number }) => {
+    setLoc(p);
+    setLocating(true);
+    try {
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${p.lat}&lon=${p.lon}&accept-language=uz,ru`
+      );
+      const j = await r.json();
+      const a = j.address || {};
+      const addr = [a.road || "", a.house_number || ""].filter(Boolean).join(", ")
+        || a.suburb || a.neighbourhood || a.quarter || a.district || a.city || a.town || a.village || "";
+      if (addr) setAddress(addr);
+      const dist = a.suburb || a.city_district || a.district || a.neighbourhood || a.quarter || a.town || a.village || "";
+      if (dist) setCity(dist);
+      const iso = ISO_REG[a["ISO3166-2-lvl4"] || ""];
+      if (iso) { setRegion(iso); return; }
+      const n = normW(a.state || a.county || a.city || "").replace(/[^a-z ]/g, "");
+      for (const o of REGIONS) {
+        const w = normW(o).split(" ")[0].replace(/[^a-z]/g, "");
+        if (w && w.length > 2 && n.includes(w)) { setRegion(o); break; }
+      }
+    } catch {
+      /* jim */
+    } finally {
+      setLocating(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -77,13 +119,14 @@ export default function CheckoutPage() {
     if (name.trim().length < 2) return setErr("Ismingizni yozing");
     if (phone.replace(/\D/g, "").length < 9) return setErr("Telefonni to'g'ri kiriting");
     if (city.trim().length < 2) return setErr("Shaharni yozing");
-    if (address.trim().length < 5) return setErr("Manzilni yozing");
+    if (address.trim().length < 5 && !loc) return setErr("Manzilni yozing yoki xaritadan belgilang 📍");
     setBusy(true);
     try {
       const key = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
       const r = await createOrder({
         name: name.trim(), phone: phone.trim(), region, city: city.trim(),
         address: address.trim(), note: note.trim(), ship, pay,
+        lat: loc ? loc.lat : null, lon: loc ? loc.lon : null,
         promo: promo.trim().toUpperCase(), client_key: key,
         items: cart.map((i) => ({ slug: i.slug, qty: i.qty })),
       });
@@ -137,7 +180,14 @@ export default function CheckoutPage() {
           <label className="field"><span>Hudud *</span><select value={region} onChange={(e) => setRegion(e.target.value)}>{REGIONS.map((r) => <option key={r}>{r}</option>)}</select></label>
           <label className="field"><span>Shahar/Tuman *</span><input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Chilonzor" /></label>
         </div>
-        <label className="field"><span>Manzil *</span><input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Ko'cha, uy" /></label>
+        <label className="field"><span>Manzil <small className="text-stone-400">— xarita belgilasangiz shart emas</small></span><input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Ko'cha, uy" /></label>
+        <div>
+          <span className="text-[13px] font-semibold text-[#4a4a44]">Xaritadan belgilash 📍</span>
+          <div className="mt-1.5"><CheckoutMap onPick={onPick} /></div>
+          <p className="text-xs text-stone-500 mt-1.5">
+            {locating ? "📍 Manzil qidirilmoqda..." : loc ? `📍 ${loc.lat}, ${loc.lon} — manzil avtomatik to'ldirildi` : "Nuqtani bosing — manzil o'zi to'ladi"}
+          </p>
+        </div>
         <label className="field"><span>Izoh</span><input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Tabriknoma, qavat..." /></label>
       </div>
 

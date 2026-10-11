@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/auth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 
 export const metadata: Metadata = {
   title: "FAX Flores — Premium gullar Toshkentda",
