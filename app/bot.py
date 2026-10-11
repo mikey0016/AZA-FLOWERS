@@ -220,7 +220,6 @@ def handle_message(base: Path, msg: dict) -> None:
         if arg.startswith("ord_"):
             handle_user_start(base, cid, arg[4:])
             return
-        reply(base, cid, "👋 <b>AZA FLOWERS — admin panel</b>\n━━━━━━━━━━━━\n<b>Buyruqlar</b>\n\n📋 /orders — <i>so'nggi buyurtmalar</i>\n📊 /stats — <i>statistika</i>\n➕ /addproduct — <i>yangi mahsulot</i>\n📦 /products — <i>mahsulotlar ro'yxati</i>\n🎟 /promo_add KOD FOIZ [SONI] — <i>promokod</i>\n💳 /setcard KARTA — <i>to'lov kartasi</i>\nℹ️ /help — <i>yordam</i>", menu=True)
         send_panel(base, cid)
         return
     elif text == "🌷 Mahsulotlar" or text in ("/mahsulotlar", "/products"):
