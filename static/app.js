@@ -255,6 +255,45 @@ function placeCoLoc(lat,lon){
   else coMarker=L.marker([lat,lon]).addTo(coMap);
   const mc=document.getElementById('mapCoords');
   if(mc)mc.textContent=`📍 ${CO.loc.lat}, ${CO.loc.lon}`;
+  revGeo(lat,lon);
+}
+/* Xaritadan tanlanganda manzilni avtomatik to'ldirish (Nominatim, kalitsiz) */
+let revTimer=null,revSeq=0;
+function normW(x){return (x||'').toLowerCase().replace(/[‘’'ʼ`]/g,'')}
+function matchRegion(s){
+  const n=normW(s).replace(/[^a-z ]/g,'');
+  for(const o of (CFG.regions||[])){
+    const w=normW(o).split(' ')[0].replace(/[^a-z]/g,'');
+    if(w&&w.length>2&&n.includes(w))return o;
+  }
+  return '';
+}
+const ISO_REG={'UZ-TK':'Toshkent shahri','UZ-TO':'Toshkent viloyati','UZ-SA':'Samarqand','UZ-BU':'Buxoro','UZ-AN':'Andijon','UZ-FA':"Farg'ona",'UZ-NG':'Namangan','UZ-QA':'Qashqadaryo','UZ-SU':'Surxondaryo','UZ-XO':'Xorazm','UZ-NW':'Navoiy','UZ-JI':'Jizzax','UZ-SI':'Sirdaryo','UZ-QR':"Qoraqalpog'iston"};
+function revGeo(lat,lon){
+  clearTimeout(revTimer);
+  const my=++revSeq;
+  revTimer=setTimeout(async()=>{
+    const mc=document.getElementById('mapCoords');
+    if(mc)mc.textContent='📍 Manzil qidirilmoqda...';
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=uz,ru`);
+      const j=await r.json();
+      if(my!==revSeq)return;
+      const a=j.address||{};
+      const road=a.road||'';
+      const hn=a.house_number||'';
+      const addr=[road,hn].filter(Boolean).join(', ')||a.suburb||a.neighbourhood||a.quarter||a.district||a.city||a.town||a.village||'';
+      const fa=document.getElementById('fAddr');
+      if(fa&&addr)fa.value=addr;
+      const dist=a.suburb||a.city_district||a.district||a.neighbourhood||a.quarter||a.town||a.village||'';
+      const fc=document.getElementById('fCity');
+      if(fc&&dist&&!fc.value)fc.value=dist;
+      const reg=ISO_REG[a['ISO3166-2-lvl4']]||matchRegion(a.state||a.county||a.city||'');
+      if(reg){const fr=document.getElementById('fRegion');if(fr)fr.value=reg}
+      if(mc)mc.textContent=`📍 ${addr||(lat+', '+lon)}`;
+      if(addr)toast('📍 Manzil avtomatik to‘ldirildi');
+    }catch(e){if(mc&&my===revSeq)mc.textContent=`📍 ${lat}, ${lon}`}
+  },450);
 }
 function refreshCo(){
   const t=coTotals();

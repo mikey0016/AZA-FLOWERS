@@ -196,6 +196,40 @@ window.openCheckout=()=>{
   setTimeout(initCoMapD,120);
 };
 let coMapD=null,coMarkerD=null;
+let revTimerD=null,revSeqD=0;
+function normWD(x){return (x||'').toLowerCase().replace(/[‘’'ʼ`]/g,'')}
+function revGeoD(lat,lon){
+  clearTimeout(revTimerD);
+  const my=++revSeqD;
+  revTimerD=setTimeout(async()=>{
+    const mc=document.getElementById('mapCoords');
+    if(mc)mc.textContent='📍 Manzil qidirilmoqda...';
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=uz,ru`);
+      const j=await r.json();
+      if(my!==revSeqD)return;
+      const a=j.address||{};
+      const ISO={'UZ-TK':'Toshkent shahri','UZ-TO':'Toshkent viloyati','UZ-SA':'Samarqand','UZ-BU':'Buxoro','UZ-AN':'Andijon','UZ-FA':"Farg'ona",'UZ-NG':'Namangan','UZ-QA':'Qashqadaryo','UZ-SU':'Surxondaryo','UZ-XO':'Xorazm','UZ-NW':'Navoiy','UZ-JI':'Jizzax','UZ-SI':'Sirdaryo','UZ-QR':"Qoraqalpog'iston"};
+      const road=a.road||'';
+      const hn=a.house_number||'';
+      const addr=[road,hn].filter(Boolean).join(', ')||a.suburb||a.neighbourhood||a.quarter||a.district||a.city||a.town||a.village||'';
+      const fa=document.getElementById('fAddr');
+      if(fa&&addr)fa.value=addr;
+      const dist=a.suburb||a.city_district||a.district||a.neighbourhood||a.quarter||a.town||a.village||'';
+      const fc=document.getElementById('fCity');
+      if(fc&&dist&&!fc.value)fc.value=dist;
+      const n=normWD(a.state||a.county||a.city||'').replace(/[^a-z ]/g,'');
+      let reg=ISO[a['ISO3166-2-lvl4']]||'';
+      if(!reg)for(const o of REGIONS){
+        const w=normWD(o).split(' ')[0].replace(/[^a-z]/g,'');
+        if(w&&w.length>2&&n.includes(w)){reg=o;break}
+      }
+      if(reg){const fr=document.getElementById('fRegion');if(fr)fr.value=reg}
+      if(mc)mc.textContent=`📍 ${addr||(lat+', '+lon)}`;
+      if(addr)toast('📍 Manzil avtomatik to‘ldirildi');
+    }catch(e){if(mc&&my===revSeqD)mc.textContent=`📍 ${lat}, ${lon}`}
+  },450);
+}
 function initCoMapD(){
   const el=document.getElementById('orderMap');
   if(!el||typeof L==='undefined')return;
@@ -209,6 +243,7 @@ function initCoMapD(){
     else coMarkerD=L.marker(e.latlng).addTo(coMapD);
     const mc=document.getElementById('mapCoords');
     if(mc)mc.textContent=`📍 ${CO.loc.lat}, ${CO.loc.lon}`;
+    revGeoD(CO.loc.lat,CO.loc.lon);
   });
   setTimeout(()=>coMapD&&coMapD.invalidateSize(),300);
   const fm=document.getElementById('findMe');
@@ -222,6 +257,7 @@ function initCoMapD(){
       coMapD.setView([p.coords.latitude,p.coords.longitude],15);
       const mc=document.getElementById('mapCoords');
       if(mc)mc.textContent=`📍 ${CO.loc.lat}, ${CO.loc.lon}`;
+      revGeoD(CO.loc.lat,CO.loc.lon);
     },()=>toast('Ruxsat berilmadi — xaritani bosing 📍'),{timeout:10000});
   };
 }
