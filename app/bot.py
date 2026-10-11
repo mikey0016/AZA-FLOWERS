@@ -21,8 +21,6 @@ from app import store as pstore
 
 log = logging.getLogger("aza.bot")
 
-MENU = [["🧾 So'nggi buyurtmalar", "📊 Bugungi hisobot"], ["🌷 Mahsulotlar", "📦 Qoldiqlar"], ["🎟 Promokodlar", "💳 Karta"], ["ℹ️ Yordam"]]
-
 HELP = (
     "ℹ️ Yangi buyurtma kelganda tugmalar bilan xabar keladi:\n"
     "✅ Qabul — mijozga qo'ng'iroq qiling\n"
@@ -134,13 +132,12 @@ def register_chat(base: Path, chat_id: int, frm: dict) -> None:
         save_chats(base, chats)
 
 
-# --- xabarlar ---
+# Reply-klaviatura olib tashlangan (SAMA uslubi — faqat inline tugmalar).
+# menu=True endi mijozdagi eski klaviaturani yashiradi.
 def reply(base: Path, chat_id: int, text: str, menu: bool = False) -> bool:
     payload: dict = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
     if menu:
-        payload["reply_markup"] = json.dumps(
-            {"keyboard": [[{"text": b} for b in row] for row in MENU], "resize_keyboard": True}
-        )
+        payload["reply_markup"] = json.dumps({"remove_keyboard": True})
     try:
         tg.call_api(base, "sendMessage", payload, timeout=15)
         return True
