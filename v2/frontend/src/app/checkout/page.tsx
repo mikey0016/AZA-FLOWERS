@@ -7,6 +7,8 @@ import { useShop } from "@/lib/shop";
 import { useAuth, authHeaders } from "@/lib/auth";
 import CheckoutMap from "@/components/CheckoutMap";
 
+const BOT_USERNAME = "azaflowersbot";
+
 const ISO_REG: Record<string, string> = {
   "UZ-TK": "Toshkent shahri", "UZ-TO": "Toshkent viloyati", "UZ-SA": "Samarqand",
   "UZ-BU": "Buxoro", "UZ-AN": "Andijon", "UZ-FA": "Farg'ona", "UZ-NG": "Namangan",
@@ -35,6 +37,7 @@ export default function CheckoutPage() {
   const [promoMsg, setPromoMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [done, setDone] = useState<{ id: number; no: string; total: number; prepay: number; phone: string } | null>(null);
   const [loc, setLoc] = useState<{ lat: number; lon: number } | null>(null);
   const [locating, setLocating] = useState(false);
 
@@ -132,7 +135,8 @@ export default function CheckoutPage() {
       });
       clear();
       notify("Buyurtma qabul qilindi!");
-      router.push(`/track?id=${r.id}&phone=${encodeURIComponent(phone.trim())}`);
+      setDone({ id: r.id, no: r.no, total: parseFloat(r.total), prepay: parseFloat(r.prepay), phone: phone.trim() });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Xatolik");
     } finally {
@@ -145,6 +149,32 @@ export default function CheckoutPage() {
       <div className="eyebrow">Buyurtma</div>
       <h1 className="h-serif text-4xl mt-2">Rasmiylashtirish</h1>
 
+      {done && (
+        <div className="text-center bg-white border border-beige rounded-2xl p-6 mt-6">
+          <div className="text-5xl">✓</div>
+          <h2 className="h-serif text-3xl mt-2">Buyurtma {done.no} qabul qilindi!</h2>
+          <p className="text-stone-600 text-sm mt-1">Rahmat! Endi to&apos;lovni yakunlang.</p>
+          <div className="text-left border border-beige rounded-xl p-4 mt-4 grid gap-1 text-sm max-w-[420px] mx-auto">
+            <div className="flex justify-between"><span>Jami</span><b>{uzs(done.total)}</b></div>
+            <div className="flex justify-between font-bold text-forest"><span>Oldindan to&apos;lov</span><b>{uzs(done.prepay)}</b></div>
+            <div className="flex justify-between text-stone-500"><span>Qolgan</span><span>{uzs(done.total - done.prepay)}</span></div>
+          </div>
+          <div className="max-w-[420px] mx-auto mt-4">
+            <h3 className="h-serif text-2xl">Keyingi qadam — 50% to&apos;lov 💳</h3>
+            <p className="text-sm text-stone-600 mt-1"><b>{uzs(done.prepay)}</b> ni to&apos;lang va chekni botga yuboring.</p>
+            <a className="btn btn-primary w-full mt-3" target="_blank" rel="noopener"
+              href={`https://t.me/${BOT_USERNAME}?start=ord_${done.id}`}>
+              ✈ Botga o&apos;tish va chek yuborish
+            </a>
+            <p className="text-xs text-stone-400 mt-2">⚠️ Aynan <b>{uzs(done.prepay)}</b> to&apos;lang — ko&apos;p ham, kam ham emas. Chek tekshirilgach, buyurtma adminga o&apos;tadi.</p>
+            <div className="flex gap-2 mt-3">
+              <a className="btn btn-outline flex-1 text-sm"
+                href={`/track?id=${done.id}&phone=${encodeURIComponent(done.phone)}`}>Kuzatish →</a>
+              <button className="btn btn-outline flex-1 text-sm" onClick={() => router.push("/shop")}>Xaridni davom ettirish</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="bg-white border border-beige rounded-2xl p-5 mt-6">
         <h3 className="font-bold mb-3">Tarkib</h3>
         {cart.map((i) => (

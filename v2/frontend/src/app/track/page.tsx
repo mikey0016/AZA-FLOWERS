@@ -104,7 +104,15 @@ function TrackInner() {
               <p className="mt-1 text-stone-500">Aynan {uzs(order.payment.required_amount)} o&apos;tkazing, chekni pastga yuklang.</p>
             </div>
           )}
-          <div className="mt-4 grid gap-2">
+          <div className="mt-4 grid gap-2 border-t border-beige pt-4">
+            <h4 className="font-semibold text-sm">Yoki Telegram bot orqali (eski tizim) ✈</h4>
+            <p className="text-xs text-stone-500">Botga kiring, <b>{uzs(order.payment.required_amount)}</b> ni to&apos;lang va chekni rasm qilib yuboring.</p>
+            <a className="btn btn-primary" target="_blank" rel="noopener"
+              href={`https://t.me/azaflowersbot?start=ord_${order.id}`}>
+              ✈ Botga o&apos;tish va chek yuborish
+            </a>
+          </div>
+          <div className="mt-4 grid gap-2 border-t border-beige pt-4">
             <h4 className="font-semibold text-sm">Chek yuklash (JPG/PNG/WEBP/PDF, 8MB)</h4>
             <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" onChange={(e) => setFile(e.target.files?.[0] || null)}
               className="text-sm" />
