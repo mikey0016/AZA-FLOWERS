@@ -1,4 +1,4 @@
-/* AZA FLOWERS — umumiy frontend (barcha sahifalar uchun) */
+/* FAX Flores — umumiy frontend (barcha sahifalar uchun) */
 const $=s=>document.querySelector(s);
 const on=(sel,ev,fn)=>{const el=typeof sel==='string'?document.querySelector(sel):sel;if(el)el.addEventListener(ev,fn);return el};
 let ALL=[],CATS=[],CFG={delivery_fee:0,free_delivery_from:null,delivery_note:'',contact:{}},curCat='all',curTab='new';
@@ -52,10 +52,11 @@ async function load(){
   const ph=(c.phones||[])[0]||'+998 90 350 71 78';
   const h1=$('#hPhone');if(h1)h1.textContent=ph;
   const h2=$('#hPhone2');if(h2)h2.textContent=ph;
-  const admins=(c.admins||[]).map(a=>`<a href="https://t.me/${a.replace('@','')}" target="_blank" style="color:var(--accent-dark);font-weight:600">${a}</a>`).join(', ');
+  const team=c.team||(c.admins||[]).map(a=>({role:'Admin',handle:a,url:'https://t.me/'+a.replace('@','')}));
+  const teamLinks=team.map(m=>`${m.role}: <a href="${m.url}" target="_blank" style="color:var(--accent-dark);font-weight:600">${m.handle}</a>`).join('<br>');
   const phones=(c.phones||[]).map(p=>`<a href="tel:${p.replace(/\s/g,'')}" style="font-weight:600">${p}</a>`).join(', ');
-  const cb=$('#contactBox');if(cb)cb.innerHTML=`Telefonlar: ${phones}<br>Manzil: ${c.address||''}<br>Ish vaqti: ${c.hours||''}<br>Adminlar: ${admins}`;
-  const fc=$('#footContact');if(fc)fc.innerHTML=(c.phones||[]).map(p=>`<div class="frow"><div><a href="tel:${p.replace(/\s/g,'')}">${p}</a></div></div>`).join('')+`<div class="frow"><div>${c.address||''}</div></div><div class="frow"><div>${c.hours||''}</div></div>`;
+  const cb=$('#contactBox');if(cb)cb.innerHTML=`Telefonlar: ${phones}<br>Manzil: ${c.address||''}<br>Ish vaqti: ${c.hours||''}<br>${teamLinks}`;
+  const fc=$('#footContact');if(fc)fc.innerHTML=(c.phones||[]).map(p=>`<div class="frow"><div><a href="tel:${p.replace(/\s/g,'')}">${p}</a></div></div>`).join('')+`<div class="frow"><div>${c.address||''}</div></div><div class="frow"><div>${c.hours||''}</div></div>`+team.map(m=>`<div class="frow"><div>${m.role}: <a href="${m.url}" target="_blank">${m.handle}</a></div></div>`).join('');
   const fcat=$('#footCats');if(fcat)fcat.innerHTML=cats.map(x=>`<a href="/shop?cat=${x.slug}">${x.name}</a>`).join('');
   for(const id of ['tgBtn','tgBtnF','socTg','tgFloat']) {const e=document.getElementById(id);if(e)e.href=c.telegram||'#'}
   for(const id of ['insBtn','insBtnF','socIg']) {const e=document.getElementById(id);if(e)e.href=c.instagram||'#'}
@@ -177,7 +178,7 @@ async function initProductPage(){
     if(p.detail){box.innerHTML='<div class="empty">Mahsulot topilmadi<br><a class="btn btn-acc" style="margin-top:12px;display:inline-block" href="/shop">Katalogga qaytish</a></div>';return}
     window._cur=p;
     const cat=(CATS.find(c=>c.slug===p.category)||{}).name||'';
-    document.title=p.name+' — AZA FLOWERS';
+    document.title=p.name+' — FAX Flores';
     box.innerHTML=`<div class="mgrid" style="border:1px solid var(--line)"><div class="l">${flowerSVG(p,600,600)}${badges(p)}</div>
     <div class="r"><div class="cat">${cat}</div><h2 style="font-family:var(--serif);font-size:34px;font-weight:400;margin:6px 0">${p.name}</h2>
     <div class="stars">★★★★★ <span>4.9 (120+)</span></div>
@@ -353,7 +354,7 @@ async function doSubmit(){
 }
 function showSuccess(o,form){
   const box=$('#coBody');if(!box)return;
-  const no=o.no||('AZA-'+(o.id||o.order_id));
+  const no=o.no||('FAX-'+(o.id||o.order_id));
   const botUrl=o.bot_url||`https://t.me/${BOT_USERNAME}?start=ord_${o.id||o.order_id}`;
   box.innerHTML=`<div style="text-align:center;padding:10px 0;max-width:560px;margin:0 auto">
     <div style="font-size:52px">✓</div>
@@ -528,7 +529,7 @@ function bindChrome(){
     const n=$('#cName').value.trim(),p=$('#cPhone').value.trim(),m=$('#cMsg').value.trim();
     if(n.length<2||p.length<7||m.length<3)return toast("Barchasini to'ldiring");
     const u=(CFG.contact&&CFG.contact.telegram)||'https://t.me/azaflowers';
-    try{navigator.clipboard.writeText(`💬 AZA xabar\n👤 ${n}\n📞 ${p}\n\n${m}`).catch(()=>{})}catch(e){}
+    try{navigator.clipboard.writeText(`💬 FAX xabar\n👤 ${n}\n📞 ${p}\n\n${m}`).catch(()=>{})}catch(e){}
     window.open(u,'_blank');toast('Xabar nusxalandi — Telegramda yuboring');
   };
   if(location.hash==='#kirish')openModal('#amodal');

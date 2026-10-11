@@ -1,4 +1,4 @@
-# AZA FLOWERS v2 — Django backend (1-faza: do'kon + buyurtma + qo'lda to'lov + admin)
+# FAX Flores v2 — Django backend (1-faza: do'kon + buyurtma + qo'lda to'lov + admin)
 
 Jonli v1 (FastAPI) ga tegilmaydi. v2 alohida papkada rivojlanadi.
 

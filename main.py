@@ -48,7 +48,7 @@ async def lifespan(app: FastAPI):
         threading.Thread(target=botmod.run_polling, args=(BASE_DIR,), daemon=True).start()
     yield
 
-app = FastAPI(title="AZA FLOWERS", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="FAX Flores", version="1.0.0", lifespan=lifespan)
 
 # --- helpers ---
 def product_card(p: dict) -> dict:
@@ -232,7 +232,7 @@ async def create_order2(o: OrderNew, bg: BackgroundTasks, request: Request):
     if o.lat and o.lon and addr and "xaritada" not in addr:
         addr += " (xaritada belgilangan 📍)"
     order = {
-        "id": oid, "no": f"AZA-{oid}", "source": "sayt",
+        "id": oid, "no": f"FAX-{oid}", "source": "sayt",
         "user_id": u["id"] if u else None,
         "name": o.name.strip(), "phone": o.phone.strip(),
         "address": addr.strip(), "note": (o.note or "").strip(),
@@ -260,7 +260,7 @@ async def create_order2(o: OrderNew, bg: BackgroundTasks, request: Request):
 async def order_status(id: int):
     for o in load_orders():
         if o.get("id") == id:
-            return {"ok": True, "id": o["id"], "no": o.get("no", f"AZA-{o['id']}"),
+            return {"ok": True, "id": o["id"], "no": o.get("no", f"FAX-{o['id']}"),
                     "status": o.get("status", "yangi"), "total": o.get("total", 0),
                     "prepay": o.get("prepay", 0)}
     raise HTTPException(404, "Buyurtma topilmadi")

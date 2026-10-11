@@ -185,6 +185,11 @@ CONTACT = {
     "phones": ["+998 90 350 71 78", "+998 77 497 71 78", "+998 50 020 77 86"],
     "telegram": "https://t.me/azaflowers",
     "admins": ["@Aziz_Raximov", "@wviiiiw", "@XA_XAUUSD"],
+    "team": [
+        {"role": "Founder", "handle": "@wviiiiw", "url": "https://t.me/wviiiiw"},
+        {"role": "CO Founder", "handle": "@Aziz_Raximov", "url": "https://t.me/Aziz_Raximov"},
+        {"role": "Operator", "handle": "@XA_XAUUSD", "url": "https://t.me/XA_XAUUSD"},
+    ],
     "instagram": "https://instagram.com/aza.flowers",
     "address": "Toshkent sh., Chilonzor tumani, Bunyodkor shoh ko'chasi 12",
     "hours": "Har kuni 08:00 - 22:00",

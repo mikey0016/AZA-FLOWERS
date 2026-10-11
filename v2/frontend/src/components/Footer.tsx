@@ -8,7 +8,7 @@ export default function Footer() {
     <footer className="bg-forest-deep text-white mt-16">
       <div className="container-x grid sm:grid-cols-2 lg:grid-cols-4 gap-8 py-12">
         <div>
-          <div className="h-serif text-2xl tracking-[0.18em]">AZA</div>
+          <div className="h-serif text-2xl tracking-[0.18em]">FAX</div>
           <div className="text-[10px] tracking-[0.3em] opacity-70 font-semibold">FLOWERS</div>
           <p className="text-sm opacity-70 mt-4 leading-relaxed">
             {lang === "uz"
@@ -50,7 +50,7 @@ export default function Footer() {
       </div>
       <div className="border-t border-white/15">
         <div className="container-x py-4 flex flex-wrap gap-2 justify-between text-xs opacity-60">
-          <span>© 2026 AZA FLOWERS. {t.allRights}.</span>
+          <span>© 2026 FAX Flores. {t.allRights}.</span>
           <span>08:00 – 22:00</span>
         </div>
       </div>

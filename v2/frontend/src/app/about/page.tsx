@@ -4,7 +4,7 @@ export default function About() {
       <div className="eyebrow">Biz haqimizda</div>
       <h1 className="h-serif text-4xl sm:text-5xl mt-2">Gul emas — hissiyot sovg&apos;a qilamiz</h1>
       <p className="text-stone-600 leading-relaxed mt-4">
-        AZA FLOWERS — Toshkentdagi premium gul uyi. Har bir buket floristlarimiz
+        FAX Flores — Toshkentdagi premium gul uyi. Har bir buket floristlarimiz
         tomonidan qo&apos;lda, sevgi bilan yig&apos;iladi. Gollandiya va Ekvador navlari,
         mahalliy issiqxonalar bilan hamkorlik.
       </p>

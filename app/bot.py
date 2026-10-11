@@ -33,7 +33,7 @@ HELP = (
 )
 
 USER_HELP = (
-    "🌷 <b>AZA FLOWERS</b> do'kon boti.\n\n"
+    "🌷 <b>FAX Flores</b> do'kon boti.\n\n"
     "Buyurtma berish uchun saytdan buyurtma qoldiring — to'lov uchun shu botga link beriladi.\n\n"
     "/myorders — buyurtmalarim"
 )
@@ -200,7 +200,7 @@ def handle_message(base: Path, msg: dict) -> None:
             if arg.startswith("ord_"):
                 handle_user_start(base, cid, arg[4:])
                 return
-            reply(base, cid, "👋 <b>AZA FLOWERS</b> do'kon boti.\n\nBuyurtma berish uchun saytdan buyurtma qoldiring — to'lov uchun shu botga link beriladi.\n\n/myorders — buyurtmalarim")
+            reply(base, cid, "👋 <b>FAX Flores</b> do'kon boti.\n\nBuyurtma berish uchun saytdan buyurtma qoldiring — to'lov uchun shu botga link beriladi.\n\n/myorders — buyurtmalarim")
             return
         if text.startswith("/myorders"):
             send_myorders(base, cid)
@@ -1234,7 +1234,7 @@ def handle_user_start(base: Path, cid: int, oid_raw: str) -> None:
     try:
         oid = int(oid_raw)
     except ValueError:
-        reply(base, cid, "👋 AZA FLOWERS 🌷\nBuyurtma uchun saytdan foydalaning: azaflowers.uz")
+        reply(base, cid, "👋 FAX Flores 🌷\nBuyurtma uchun saytdan foydalaning: azaflowers.uz")
         return
     orders = _orders(base)
     o = next((x for x in orders if x.get("id") == oid), None)
@@ -1442,7 +1442,7 @@ def send_panel(base: Path, cid: int) -> None:
          {"text": "🎟 Promokodlar", "callback_data": "promos"}]]}
     try:
         tg.call_api(base, "sendMessage", {"chat_id": cid,
-            "text": "👋 <b>AZA FLOWERS — admin panel</b>\n━━━━━━━━━━━━\n📋 /orders — <i>buyurtmalar</i>\n➕ /addproduct — <i>mahsulot qo'shish</i>\n📦 /products — <i>mahsulotlar</i>\n📊 /stats — <i>statistika</i>\n🎟 /promo_list — <i>promokodlar</i>",
+            "text": "👋 <b>FAX Flores — admin panel</b>\n━━━━━━━━━━━━\n📋 /orders — <i>buyurtmalar</i>\n➕ /addproduct — <i>mahsulot qo'shish</i>\n📦 /products — <i>mahsulotlar</i>\n📊 /stats — <i>statistika</i>\n🎟 /promo_list — <i>promokodlar</i>",
             "parse_mode": "HTML", "reply_markup": json.dumps(kb)}, timeout=15)
     except Exception as e:
         log.warning("panel xatosi: %s", e)

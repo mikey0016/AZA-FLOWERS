@@ -129,7 +129,7 @@ def _fm(n: int) -> str:
 def order_text(o: dict) -> str:
     from app.bot import st_label as _st
     DIV = "━━━━━━━━━━━━"
-    no = o.get("no") or f"AZA-{o['id']}"
+    no = o.get("no") or f"FAX-{o['id']}"
     lines = "\n".join(f"{i}. {_h.escape(ln['name'])} × {ln['qty']} = {_fm(ln['total'])}"
                       for i, ln in enumerate(o.get("lines", []) or [], 1)) or "—"
     parts = [

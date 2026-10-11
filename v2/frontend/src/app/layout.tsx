@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AZA FLOWERS — Premium gullar Toshkentda",
+  title: "FAX Flores — Premium gullar Toshkentda",
   description: "Premium buketlar: atirgul, lola, pion. Har kuni 08:00–22:00.",
 };
 

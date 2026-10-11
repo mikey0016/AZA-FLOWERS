@@ -19,7 +19,7 @@ class OrderError(ValueError):
 
 def _gen_no() -> str:
     stamp = int(timezone.now().timestamp() * 1000) % 1000000
-    return f"AZA-{stamp:06d}"
+    return f"FAX-{stamp:06d}"
 
 
 @transaction.atomic

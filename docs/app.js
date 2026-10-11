@@ -1,4 +1,4 @@
-/* AZA FLOWERS — docs/ static versiya, ciello.uz layout 1:1. data.json dan o'qiydi. */
+/* FAX Flores — docs/ static versiya, ciello.uz layout 1:1. data.json dan o'qiydi. */
 'use strict';
 const $=s=>document.querySelector(s);
 let ALL=[],CATS=[],CFG={delivery_note:'',contact:{}},curCat='all',curTab='new';
@@ -293,7 +293,7 @@ function doSubmitD(){
   const t=coTotals();
   const lines=t.items.map(i=>`• ${i.name} — ${i.qty} dona — ${fmt(i.price*i.qty)}`).join('\n');
   const locLine=CO.loc?`\n🗺 Xarita: https://maps.google.com/?q=${CO.loc.lat},${CO.loc.lon}`:'';
-  const msg=`🌷 AZA FLOWERS — yangi buyurtma (sayt)\n👤 ${f.name}\n📞 ${f.phone}\n📍 ${f.region}, ${f.city}, ${f.address}${CO.loc?' (xaritada belgilangan 📍)':''}\n💬 ${f.note||'-'}\n🚚 ${SHIP_LABEL[CO.ship]}\n💳 ${PAY_LABEL[CO.pay]}${locLine}\n\n${lines}\n\nJami: ${fmt(t.total)}\nOldindan 50%: ${fmt(t.prepay)}`;
+  const msg=`🌷 FAX Flores — yangi buyurtma (sayt)\n👤 ${f.name}\n📞 ${f.phone}\n📍 ${f.region}, ${f.city}, ${f.address}${CO.loc?' (xaritada belgilangan 📍)':''}\n💬 ${f.note||'-'}\n🚚 ${SHIP_LABEL[CO.ship]}\n💳 ${PAY_LABEL[CO.pay]}${locLine}\n\n${lines}\n\nJami: ${fmt(t.total)}\nOldindan 50%: ${fmt(t.prepay)}`;
   try{navigator.clipboard.writeText(msg).catch(()=>{})}catch(e){}
   window.open((CFG.contact&&CFG.contact.telegram)||'https://t.me/azaflowers','_blank');
   cart={};localStorage.setItem('aza_cart','{}');renderCart();

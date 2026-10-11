@@ -12,9 +12,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   try {
     const p = await getProduct(slug);
-    return { title: `${p.name_uz} — AZA FLOWERS`, description: p.description_uz.slice(0, 150) };
+    return { title: `${p.name_uz} — FAX Flores`, description: p.description_uz.slice(0, 150) };
   } catch {
-    return { title: "Mahsulot — AZA FLOWERS" };
+    return { title: "Mahsulot — FAX Flores" };
   }
 }
 

@@ -38,7 +38,7 @@ export default function Header() {
       <div className="container-x flex items-center gap-4 py-3">
         <button className="lg:hidden text-2xl" aria-label="menu" onClick={() => setOpen(true)}>☰</button>
         <Link href="/" className="leading-none">
-          <span className="h-serif text-[26px] font-semibold tracking-[0.18em] text-forest">AZA</span>
+          <span className="h-serif text-[26px] font-semibold tracking-[0.18em] text-forest">FAX</span>
           <span className="block text-[9px] tracking-[0.3em] text-stone-500 font-semibold">FLOWERS</span>
         </Link>
         <nav className="hidden lg:flex gap-6 mx-auto">
@@ -79,7 +79,7 @@ export default function Header() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
           <aside className="absolute left-0 top-0 h-full w-[300px] bg-ivory p-6 flex flex-col gap-1 shadow-2xl">
             <button className="self-end text-2xl" onClick={() => setOpen(false)}>✕</button>
-            <Link href="/" onClick={() => setOpen(false)} className="py-3 border-b border-beige font-semibold">AZA Flowers</Link>
+            <Link href="/" onClick={() => setOpen(false)} className="py-3 border-b border-beige font-semibold">FAX Flores</Link>
             {NAV.map((n) => (
               <Link key={n.href + n.uz} href={n.href} onClick={() => setOpen(false)}
                 className="py-3 border-b border-beige text-sm font-semibold tracking-wider uppercase">

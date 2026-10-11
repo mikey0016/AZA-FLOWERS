@@ -60,13 +60,13 @@ class Command(BaseCommand):
                           "rejected": Order.STATUS_CANCELLED}
             m = 0
             for o in orders:
-                if Order.objects.filter(no=o.get("no") or f"AZA-{o['id']}").exists():
+                if Order.objects.filter(no=o.get("no") or f"FAX-{o['id']}").exists():
                     continue
                 total = money(o.get("total", 0))
                 prepay = money(o.get("prepay", total // 2))
                 method = Order.PAY_CARD if (o.get("pay") == "online") else Order.PAY_CASH
                 order = Order.objects.create(
-                    no=o.get("no") or f"AZA-{o['id']}", name=o.get("name", ""),
+                    no=o.get("no") or f"FAX-{o['id']}", name=o.get("name", ""),
                     phone=o.get("phone", ""), address=o.get("address", "")[:200],
                     note=(o.get("note") or o.get("comment") or "")[:300],
                     lat=o.get("lat"), lon=o.get("lon"),

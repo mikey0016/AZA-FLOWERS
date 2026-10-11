@@ -1,4 +1,4 @@
-"""AZA FLOWERS v2 settings: SQLite by default (dev/Windows), PostgreSQL via env (prod)."""
+"""FAX Flores v2 settings: SQLite by default (dev/Windows), PostgreSQL via env (prod)."""
 import os
 from pathlib import Path
 
