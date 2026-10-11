@@ -19,7 +19,7 @@ function escA(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;
 
 function flowerSVG(p,w=400,h=400){
   if(p.photo)return `<div style="aspect-ratio:${w}/${h};overflow:hidden;background:var(--imgbg)"><img src="${p.photo}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>`;
-  const o=p.img||{petals:12,petal:'#a9bde0',center:'#f6c445',bg:['#f7f8fb','#e9eef6'],leaves:true};
+  const o=p.img||{petals:12,petal:'#c9a24f',center:'#f6e3a5',bg:['#faf5ec','#efe0c3'],leaves:true};
   const cx=w/2,cy=h/2-10,R=Math.min(w,h)*0.30;let s='';
   for(let i=0;i<o.petals;i++){const a=i/o.petals*Math.PI*2;
     const x=cx+Math.cos(a)*R*0.62,y=cy+Math.sin(a)*R*0.62;
@@ -97,7 +97,7 @@ function renderPills(){
 function renderCircles(){
   const box=$('#catCircles');if(!box)return;
   box.innerHTML=CATS.map(c=>{
-    const rep=ALL.find(p=>p.category===c.slug)||{slug:c.slug,img:{petals:12,petal:'#a9bde0',center:'#ffd166',bg:['#f7f7f7','#e9eef6'],leaves:true}};
+    const rep=ALL.find(p=>p.category===c.slug)||{slug:c.slug,img:{petals:12,petal:'#c9a24f',center:'#f6e3a5',bg:['#faf5ec','#efe0c3'],leaves:true}};
     return `<div class="catcircle" data-cat="${c.slug}"><div class="im"><div>${flowerSVG(rep,200,200)}</div></div><b>${c.name}</b><small>${c.total||''} mahsulot</small></div>`;
   }).join('');
   box.onclick=e=>{const el=e.target.closest('[data-cat]');if(!el)return;location.href='/shop?cat='+el.dataset.cat};
