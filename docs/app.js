@@ -159,34 +159,37 @@ window.openCheckout=()=>{
   $('#coBody').innerHTML=`
   <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtma berish</h2>
   <div id="coSummary" style="margin:14px 0"></div>
+  <div class="promo-row"><input id="promoInput" placeholder="Promokod (% li)" autocomplete="off"><button type="button" class="btn btn-outline" id="promoBtn" style="padding:12px 22px">Qo'llash</button></div>
+  <p class="promo-msg" id="promoMsg"></p>
   <p id="prepayCardLine" style="font-size:14px;color:var(--body)">💳 50% oldindan to'lov: operatorimiz sizga karta yuboradi.</p>
   <form id="orderForm" novalidate><div class="cform" style="margin-top:6px">
-    <div><div class="fgrid2">
+    <div><h3>Aloqa ma'lumotlari</h3><div class="fgrid2" style="margin-top:10px">
       <label class="fld"><span>Ism Familiya *</span><input id="fName" name="name" autocomplete="name" placeholder="Ali Valiyev" value="${escA(pr.name)}"></label>
       <label class="fld"><span>Telefon *</span><input id="fPhone" name="phone" autocomplete="tel" inputmode="tel" placeholder="+998 90 770 81 24" value="${escA(pr.phone)}"></label>
     </div></div>
-    <div><div class="fgrid2">
+    <div><h3>Yetkazib berish manzili</h3><div class="fgrid2" style="margin-top:10px">
       <label class="fld"><span>Viloyat / shahar *</span><select id="fRegion" name="region" autocomplete="address-level1">${REGIONS.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
-      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" name="city" autocomplete="address-level2" value="${escA(pr.city)}"></label>
-    </div></div>
-    <div>
-      <label class="fld"><span>Manzil (ko'cha, uy) <small style="color:var(--muted)">— xarita belgilasangiz shart emas</small></span><input id="fAddr" name="address" autocomplete="street-address" value="${escA(pr.address)}"></label>
-      <div class="fld" style="margin-top:10px"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
+      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" name="city" autocomplete="address-level2" placeholder="Masalan: Chilonzor" value="${escA(pr.city)}"></label>
     </div>
-    <div><div class="fld"><span>To'lov usuli</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
+      <label class="fld" style="margin-top:10px"><span>Manzil (ko'cha, uy) <small style="color:var(--muted)">— xarita belgilasangiz shart emas</small></span><input id="fAddr" name="address" autocomplete="street-address" placeholder="Masalan: Bunyodkor shoh ko'chasi 12" value="${escA(pr.address)}"></label>
+      <div class="fld" style="margin-top:10px"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
+      <label class="fld" style="margin-top:10px"><span>Izoh (kuryer uchun)</span><input id="fNote" name="note" autocomplete="off" placeholder="Masalan: 2-qavat, lift bor" value="${escA(pr.note)}"></label>
+    </div>
+    <div><h3>Yetkazish usuli</h3><div style="display:grid;gap:8px;margin-top:10px">
+      <label class="radio-card"><input type="radio" name="ship" value="standard" checked><span><b>Standart</b><small>Yandex orqali 3 soatgacha</small></span></label>
+      <label class="radio-card"><input type="radio" name="ship" value="express"><span><b>Tezkor</b><small>1 soatda · +30 000</small></span></label>
+    </div></div>
+    <div><h3>To'lov usuli</h3><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;margin-top:10px">
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="cash" checked> Naqd</label>
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="card"> Karta</label>
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="online"> Online</label>
-    </div></div></div>
-    <div><label class="fld"><span>Izoh (kuryer uchun)</span><input id="fNote" name="note" autocomplete="off" placeholder="Masalan: 2-qavat, lift bor" value="${escA(pr.note)}"></label></div>
-    <div><div class="fld"><span>Yetkazish</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px">
-      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="ship" value="standard" checked> Standart</label>
-      <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="ship" value="express"> Tezkor</label>
-    </div></div></div>
-    <button class="btn btn-acc" id="orderSubmit" style="width:100%">Tasdiqlash</button>
+    </div></div>
+    <button class="btn btn-acc" id="orderSubmit" style="width:100%;margin-top:6px">Tasdiqlash</button>
+    <p class="hint">🔒 Ma'lumotlaringiz xavfsiz saqlanadi</p>
     </div></form>`;
   document.querySelectorAll('input[name=ship]').forEach(r=>r.onchange=()=>{CO.ship=r.value;refreshCoD()});
   document.querySelectorAll('input[name=pay]').forEach(r=>r.onchange=()=>{CO.pay=r.value});
+  $('#promoBtn').onclick=()=>{const m=$('#promoMsg');m.textContent='⛔ Promokod hozircha ishlamaydi';m.className='promo-msg err'};
   $('#orderForm').onsubmit=e=>{e.preventDefault();sendOrderD()};
   refreshCoD();closeDrawer();openModal('#cmodal');
   maskPhone($('#fPhone'));

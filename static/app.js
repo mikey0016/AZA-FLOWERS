@@ -13,7 +13,7 @@ async function doAuth(url,body){const r=await fetch(url,{method:'POST',headers:{
 
 function flowerSVG(p,w=400,h=400){
   if(p.photo)return `<div style="aspect-ratio:${w}/${h};overflow:hidden;background:var(--imgbg)"><img src="${p.photo}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>`;
-  const o=p.img||{petals:12,petal:'#e8a2b8',center:'#f6c445',bg:['#fdf6f2','#fbe9ef'],leaves:true};
+  const o=p.img||{petals:12,petal:'#a9bde0',center:'#f6c445',bg:['#f7f8fb','#e9eef6'],leaves:true};
   const cx=w/2,cy=h/2-10,R=Math.min(w,h)*0.30;let s='';
   for(let i=0;i<o.petals;i++){const a=i/o.petals*Math.PI*2;
     const x=cx+Math.cos(a)*R*0.62,y=cy+Math.sin(a)*R*0.62;
@@ -58,7 +58,7 @@ function renderPills(){
 function renderCircles(){
   const box=$('#catCircles');if(!box)return;
   box.innerHTML=CATS.map(c=>{
-    const rep=ALL.find(p=>p.category===c.slug)||{slug:c.slug,img:{petals:12,petal:'#e8a2b8',center:'#ffd166',bg:['#f7f7f7','#f3ece2'],leaves:true}};
+    const rep=ALL.find(p=>p.category===c.slug)||{slug:c.slug,img:{petals:12,petal:'#a9bde0',center:'#ffd166',bg:['#f7f7f7','#e9eef6'],leaves:true}};
     return `<div class="catcircle" data-cat="${c.slug}"><div class="im"><div>${flowerSVG(rep,200,200)}</div></div><b>${c.name}</b><small>${c.total||''} mahsulot</small></div>`;
   }).join('');
   box.onclick=e=>{const el=e.target.closest('[data-cat]');if(!el)return;curCat=el.dataset.cat;renderPills();refresh();document.getElementById('katalog').scrollIntoView({behavior:'smooth'})};
@@ -186,36 +186,41 @@ window.openCheckout=()=>{
 function renderCheckout(){
   const regions=CFG.regions||['Toshkent shahri'];
   const pr=coProfile();
+  const ships=CFG.ship||[{slug:'standard',name:'Standart',hint:"Yandex orqali 3 soatgacha"},{slug:'express',name:'Tezkor',hint:'1 soatda · +30 000'}];
   $('#coBody').innerHTML=`
   <h2 style="margin:0;font-family:var(--serif);font-size:30px;font-weight:400">Buyurtma berish</h2>
+  <p style="color:var(--muted);font-size:13.5px;margin:6px 0 0">Buyurtma uchun <b>50% oldindan to'lov</b> qilinadi.</p>
   <div id="coSummary" style="margin:14px 0"></div>
-  <div class="promo-row"><input id="promoInput" placeholder="Promokod (% li)" autocomplete="off"><button class="btn btn-outline" id="promoBtn" style="padding:12px 22px">Qo'llash</button></div>
-  <p class="promo-msg" id="promoMsg"></p>
+  <div class="cform" style="margin-top:6px">
+  <div><h3>Promokod (% li chegirma)</h3>
+    <div class="promo-row" style="margin-top:10px"><input id="promoInput" placeholder="Promokod" autocomplete="off"><button type="button" class="btn btn-outline" id="promoBtn" style="padding:12px 22px">Qo'llash</button></div>
+    <p class="promo-msg" id="promoMsg"></p>
+  </div>
   <p id="prepayCardLine" style="font-size:14px;color:var(--body)"></p>
-  <form id="orderForm" novalidate><div class="cform" style="margin-top:6px">
-    <div><div class="fgrid2">
+  <form id="orderForm" novalidate>
+    <div><h3>Aloqa ma'lumotlari</h3><div class="fgrid2" style="margin-top:10px">
       <label class="fld"><span>Ism Familiya *</span><input id="fName" name="name" autocomplete="name" placeholder="Ali Valiyev" value="${escA(pr.name)}"></label>
       <label class="fld"><span>Telefon *</span><input id="fPhone" name="phone" autocomplete="tel" inputmode="tel" placeholder="+998 90 770 81 24" value="${escA(pr.phone)}"></label>
     </div></div>
-    <div><div class="fgrid2">
+    <div><h3>Yetkazib berish manzili</h3><div class="fgrid2" style="margin-top:10px">
       <label class="fld"><span>Viloyat / shahar *</span><select id="fRegion" name="region" autocomplete="address-level1">${regions.map(r=>`<option ${pr.region===r?'selected':''}>${r}</option>`).join('')}</select></label>
-      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" name="city" autocomplete="address-level2" value="${escA(pr.city)}"></label>
-    </div></div>
-    <div>
-      <label class="fld"><span>Manzil (ko'cha, uy) <small style="color:var(--muted)">— xarita belgilasangiz shart emas</small></span><input id="fAddr" name="address" autocomplete="street-address" value="${escA(pr.address)}"></label>
-      <div class="fld" style="margin-top:10px"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
+      <label class="fld"><span>Tuman / shahar *</span><input id="fCity" name="city" autocomplete="address-level2" placeholder="Masalan: Chilonzor" value="${escA(pr.city)}"></label>
     </div>
-    <div><div class="fld"><span>To'lov usuli</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px" id="coPay">
+      <label class="fld" style="margin-top:10px"><span>Manzil (ko'cha, uy) <small style="color:var(--muted)">— xarita belgilasangiz shart emas</small></span><input id="fAddr" name="address" autocomplete="street-address" placeholder="Masalan: Bunyodkor shoh ko'chasi 12" value="${escA(pr.address)}"></label>
+      <div class="fld" style="margin-top:10px"><span>Xaritadan belgilash 📍</span><div class="mapwrap"><div id="orderMap" class="omap"></div><div class="mapbar"><button type="button" id="findMe" class="btn btn-outline btn--sm">📍 Meni topish</button><span class="mapcoords" id="mapCoords"></span></div></div></div>
+      <label class="fld" style="margin-top:10px"><span>Izoh (kuryer uchun)</span><input id="fNote" name="note" autocomplete="off" placeholder="Masalan: 2-qavat, tabriknoma matni" value="${escA(pr.note)}"></label>
+    </div>
+    <div><h3>Yetkazish usuli</h3><div style="display:grid;gap:8px;margin-top:10px" id="coShip">
+      ${ships.map(s=>`<label class="radio-card"><input type="radio" name="ship" value="${s.slug}" ${CO.ship===s.slug?'checked':''}><span><b>${s.name}</b><small>${s.hint||''}</small></span></label>`).join('')}
+    </div></div>
+    <div><h3>To'lov usuli</h3><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;margin-top:10px" id="coPay">
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="cash" checked> Naqd</label>
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="card"> Karta</label>
       <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="pay" value="online"> Online</label>
-    </div></div></div>
-    <div><label class="fld"><span>Izoh (kuryer uchun)</span><input id="fNote" name="note" autocomplete="off" placeholder="Masalan: 2-qavat, lift bor" value="${escA(pr.note)}"></label></div>
-    <div><div class="fld"><span>Yetkazish</span><div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px" id="coShip">
-      ${(CFG.ship||[{slug:'standard',name:'Standart'},{slug:'express',name:'Tezkor'}]).map(s=>`<label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="ship" value="${s.slug}" ${CO.ship===s.slug?'checked':''}> ${s.name}</label>`).join('')}
-    </div></div></div>
-    <button class="btn btn-acc" id="orderSubmit" style="width:100%">Tasdiqlash</button>
-    </div></form>`;
+    </div></div>
+    <button class="btn btn-acc" id="orderSubmit" style="width:100%;margin-top:6px">Tasdiqlash</button>
+    <p class="hint">🔒 Ma'lumotlaringiz xavfsiz saqlanadi</p>
+  </form></div>`;
   document.querySelectorAll('#coShip input').forEach(r=>r.onchange=()=>{CO.ship=r.value;refreshCo()});
   document.querySelectorAll('#coPay input').forEach(r=>r.onchange=()=>{CO.pay=r.value});
   $('#promoBtn').onclick=applyPromo;
