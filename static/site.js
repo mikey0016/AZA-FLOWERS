@@ -52,11 +52,12 @@ async function load(){
   const ph=(c.phones||[])[0]||'+998 90 350 71 78';
   const h1=$('#hPhone');if(h1)h1.textContent=ph;
   const h2=$('#hPhone2');if(h2)h2.textContent=ph;
-  const team=c.team||(c.admins||[]).map(a=>({role:'Admin',handle:a,url:'https://t.me/'+a.replace('@','')}));
-  const teamLinks=team.map(m=>`${m.role}: <a href="${m.url}" target="_blank" style="color:var(--accent-dark);font-weight:600">${m.handle}</a>`).join('<br>');
+  const team=c.team||(c.admins||[]).map(a=>({role:'Admin',handle:a,url:'https://t.me/'+a.replace('@',''),phone:''}));
+  const phLink=m=>m.phone?` · <a href="tel:${m.phone.replace(/\s/g,'')}" style="font-weight:600">${m.phone}</a>`:'';
+  const teamLinks=team.map(m=>`${m.role}: <a href="${m.url}" target="_blank" style="color:var(--accent-dark);font-weight:600">${m.handle}</a>${phLink(m)}`).join('<br>');
   const phones=(c.phones||[]).map(p=>`<a href="tel:${p.replace(/\s/g,'')}" style="font-weight:600">${p}</a>`).join(', ');
   const cb=$('#contactBox');if(cb)cb.innerHTML=`Telefonlar: ${phones}<br>Manzil: ${c.address||''}<br>Ish vaqti: ${c.hours||''}<br>${teamLinks}`;
-  const fc=$('#footContact');if(fc)fc.innerHTML=(c.phones||[]).map(p=>`<div class="frow"><div><a href="tel:${p.replace(/\s/g,'')}">${p}</a></div></div>`).join('')+`<div class="frow"><div>${c.address||''}</div></div><div class="frow"><div>${c.hours||''}</div></div>`+team.map(m=>`<div class="frow"><div>${m.role}: <a href="${m.url}" target="_blank">${m.handle}</a></div></div>`).join('');
+  const fc=$('#footContact');if(fc)fc.innerHTML=(c.phones||[]).map(p=>`<div class="frow"><div><a href="tel:${p.replace(/\s/g,'')}">${p}</a></div></div>`).join('')+`<div class="frow"><div>${c.address||''}</div></div><div class="frow"><div>${c.hours||''}</div></div>`+team.map(m=>`<div class="frow"><div>${m.role}: <a href="${m.url}" target="_blank">${m.handle}</a>${phLink(m)}</div></div>`).join('');
   const fcat=$('#footCats');if(fcat)fcat.innerHTML=cats.map(x=>`<a href="/shop?cat=${x.slug}">${x.name}</a>`).join('');
   for(const id of ['tgBtn','tgBtnF','socTg','tgFloat']) {const e=document.getElementById(id);if(e)e.href=c.telegram||'#'}
   for(const id of ['insBtn','insBtnF','socIg']) {const e=document.getElementById(id);if(e)e.href=c.instagram||'#'}
