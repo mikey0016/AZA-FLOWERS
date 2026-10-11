@@ -57,7 +57,7 @@ async function load(){
   const cb=$('#contactBox');if(cb)cb.innerHTML=`Telefonlar: ${phones}<br>Manzil: ${c.address||''}<br>Ish vaqti: ${c.hours||''}<br>Adminlar: ${admins}`;
   const fc=$('#footContact');if(fc)fc.innerHTML=(c.phones||[]).map(p=>`<div class="frow"><div><a href="tel:${p.replace(/\s/g,'')}">${p}</a></div></div>`).join('')+`<div class="frow"><div>${c.address||''}</div></div><div class="frow"><div>${c.hours||''}</div></div>`;
   const fcat=$('#footCats');if(fcat)fcat.innerHTML=cats.map(x=>`<a href="/shop?cat=${x.slug}">${x.name}</a>`).join('');
-  for(const id of ['tgBtn','tgBtnF','socTg']) {const e=document.getElementById(id);if(e)e.href=c.telegram||'#'}
+  for(const id of ['tgBtn','tgBtnF','socTg','tgFloat']) {const e=document.getElementById(id);if(e)e.href=c.telegram||'#'}
   for(const id of ['insBtn','insBtnF','socIg']) {const e=document.getElementById(id);if(e)e.href=c.instagram||'#'}
   const qp=new URLSearchParams(location.search);
   if(qp.get('cat'))curCat=qp.get('cat');
@@ -463,7 +463,22 @@ function revGeo(lat,lon){
     }catch(e){if(mc&&my===revSeq)mc.textContent=`📍 ${lat}, ${lon}`}
   },450);
 }
-/* slider */
+/* aksiya taymeri — yakshanba 23:59 gacha */
+function initCd(){
+  if(!document.getElementById('cd-d'))return;
+  const tick=()=>{
+    const now=new Date();const end=new Date(now);
+    end.setDate(now.getDate()+((7-now.getDay())%7));
+    end.setHours(23,59,59,0);
+    if(end<now)end.setDate(end.getDate()+7);
+    let s=Math.max(0,Math.floor((end-now)/1000));
+    const d=Math.floor(s/86400);s%=86400;
+    const h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+    set('cd-d',d);set('cd-h',String(h).padStart(2,'0'));set('cd-m',String(m).padStart(2,'0'));set('cd-s',String(ss).padStart(2,'0'));
+  };
+  tick();setInterval(tick,1000);
+}
 let curSlide=0,slideTimer=null;
 function showSlide(i){
   const slides=document.querySelectorAll('.slide');if(!slides.length)return;
@@ -520,6 +535,7 @@ function bindChrome(){
 }
 document.addEventListener('DOMContentLoaded',()=>{
   bindChrome();
+  initCd();
   renderCart();paintWish();
   load().then(async()=>{await loadMe();paintAuth();renderCart();paintWish()}).catch(()=>toast("Ma'lumot yuklanmadi — internetni tekshiring"));
 });
