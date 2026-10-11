@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
 from apps.shop.models import Category, Product
 from apps.shop.serializers import CategorySerializer, ProductSerializer
 
@@ -39,3 +39,11 @@ class ProductDetail(generics.RetrieveAPIView):
     serializer_class = ProductSerializer
     lookup_field = "slug"
     permission_classes = [permissions.AllowAny]
+
+
+class StaffProductViewSet(viewsets.ModelViewSet):
+    """Xodimlar uchun to'liq CRUD (bot ham shundan foydalanadi)."""
+    queryset = Product.objects.select_related("category").all()
+    serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAdminUser]
+    lookup_field = "slug"

@@ -68,10 +68,24 @@ Xodimlar (Basic/Session auth, `is_staff` shart):
 
 ## Keyingi fazalar (reja)
 
-2. Next.js mijoz frontend (katalog, savat, checkout, tracking, UZ/RU).
-3. Telegram botni v2 API ga ulash (xabarlar, chek, tasdiqlash).
-4. MinIO (rasmlar + privat cheklar), Docker Compose, VPS deploy.
-5. Kupon/loyallik kengaytmasi, hisobotlar, audit jurnali UI.
+2. ~~Next.js mijoz frontend~~ — TAYYOR (`v2/frontend`: home/shop/product/wishlist/checkout/track, UZ/RU).
+3. ~~Botni v2 ga ulash~~ — TAYYOR (`v2/bot`: admin+mijoz, testlar bilan).
+4. MinIO toggle + Docker Compose — TAYYOR. Qolgan: VPS + DNS cutover.
+
+## VPS deploy
+
+```bash
+# 1. VPS (Ubuntu 24.04, kamida 2GB RAM) + DNS A-record -> server IP
+# 2. Docker: curl -fsSL https://get.docker.com | sh
+git clone <repo> && cd AZA-FLOWERS/v2
+cp .env.example .env   # to'ldiring: DOMAIN, POSTGRES_PASSWORD, SECRETlar
+docker compose up -d --build
+docker compose exec backend python manage.py createsuperuser
+```
+
+Nginx/Caddy: `DOMAIN` -> :3000 (frontend); `/api/v2/*`, `/admin/*` -> backend:8000.
+SSL: Caddy avtomatik (yoki certbot). MinIO console `:9001` — `azaflowers` bucket (private).
+Zaxira (cron): `docker compose exec db pg_dump -U aza azaflowers > backup.sql`.
 
 ## Xavfsizlik eslatma
 

@@ -79,6 +79,25 @@ STATIC_URL = "static/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# MinIO/S3 (S3_ENDPOINT_URL bo'lsa privat bucket ishlatiladi)
+if env("S3_ENDPOINT_URL"):
+    try:
+        import storages  # django-storages (requirements'da izohda)
+        STORAGES = {
+            "default": {"BACKEND": "storages.backends.s3.S3Storage"},
+            "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+        }
+        AWS_S3_ENDPOINT_URL = env("S3_ENDPOINT_URL")
+        AWS_ACCESS_KEY_ID = env("S3_ACCESS_KEY")
+        AWS_SECRET_ACCESS_KEY = env("S3_SECRET_KEY")
+        AWS_STORAGE_BUCKET_NAME = env("S3_BUCKET_NAME")
+        AWS_S3_REGION_NAME = env("S3_REGION", "us-east-1")
+        AWS_S3_USE_SSL = env("S3_USE_SSL", "True") == "True"
+        AWS_DEFAULT_ACL = "private"
+        AWS_S3_FILE_OVERWRITE = False
+    except ImportError:
+        pass
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {

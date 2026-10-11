@@ -11,6 +11,7 @@ class Order(models.Model):
     STATUS_READY = "ready"
     STATUS_DELIVERING = "delivering"
     STATUS_DELIVERED = "delivered"
+    STATUS_CLOSED = "closed"
     STATUS_CANCELLED = "cancelled"
 
     STATUS_CHOICES = [
@@ -22,6 +23,7 @@ class Order(models.Model):
         (STATUS_READY, "Jo'natishga tayyor"),
         (STATUS_DELIVERING, "Yo'lda"),
         (STATUS_DELIVERED, "Yetkazildi"),
+        (STATUS_CLOSED, "Yakunlandi"),
         (STATUS_CANCELLED, "Bekor qilindi"),
     ]
 
@@ -34,7 +36,8 @@ class Order(models.Model):
         STATUS_PREPARING: {STATUS_READY, STATUS_CANCELLED},
         STATUS_READY: {STATUS_DELIVERING, STATUS_CANCELLED},
         STATUS_DELIVERING: {STATUS_DELIVERED, STATUS_CANCELLED},
-        STATUS_DELIVERED: set(),
+        STATUS_DELIVERED: {STATUS_CLOSED},
+        STATUS_CLOSED: set(),
         STATUS_CANCELLED: set(),
     }
 
