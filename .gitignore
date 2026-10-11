@@ -12,3 +12,6 @@ products.json
 promos.json
 payment.json
 docs/data.json
+.bot_token
+.v2_token
+offset.txt

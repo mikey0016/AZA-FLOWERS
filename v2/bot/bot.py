@@ -27,10 +27,26 @@ from texts import (  # noqa: E402
 
 log = logging.getLogger("faxbot")
 BASE = Path(__file__).resolve().parent
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+
+
+def _secret(name: str, *files: str) -> str:
+    """Avval env, keyin faqat-serverdagi fayl (600). Repoga hech narsa tushmaydi."""
+    if os.environ.get(name):
+        return os.environ[name]
+    for f in files:
+        try:
+            p = Path(f)
+            if p.exists():
+                return p.read_text().strip()
+        except Exception:
+            pass
+    return ""
+
+
+BOT_TOKEN = _secret("BOT_TOKEN", BASE / ".." / ".bot_token", BASE / ".bot_token")
 ADMIN_IDS = [int(x) for x in os.environ.get("ADMIN_IDS", "").split(",") if x.strip().isdigit()]
 V2_API = os.environ.get("V2_API", "http://127.0.0.1:8000/api/v2").rstrip("/")
-V2_TOKEN = os.environ.get("V2_TOKEN", "")
+V2_TOKEN = _secret("V2_TOKEN", BASE / ".." / ".v2_token", BASE / ".v2_token")
 PAGE_SIZE = 5
 
 
