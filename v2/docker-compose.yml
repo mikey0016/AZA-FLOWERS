@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-azaflowers}
+      POSTGRES_USER: ${POSTGRES_USER:-aza}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aza}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?set key}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?set secret}
+    volumes:
+      - miniodata:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    command: sh -c "python manage.py migrate && python manage.py import_v1 || true && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set secret}
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: ${DOMAIN:-localhost}
+      POSTGRES_DB: ${POSTGRES_DB:-azaflowers}
+      POSTGRES_USER: ${POSTGRES_USER:-aza}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set password}
+      POSTGRES_HOST: db
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?set key}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?set secret}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-azaflowers}
+    volumes:
+      - mediadata:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    environment:
+      API_URL: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
+  miniodata:
+  mediadata:
