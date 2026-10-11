@@ -339,6 +339,30 @@ async def page_track():
 async def page_cabinet():
     return FileResponse(STATIC_DIR / "cabinet.html")
 
+@app.get("/shop")
+async def page_shop():
+    return FileResponse(STATIC_DIR / "shop.html")
+
+@app.get("/sale")
+async def page_sale():
+    return FileResponse(STATIC_DIR / "sale.html")
+
+@app.get("/product/{slug}")
+async def page_product(slug: str):
+    return FileResponse(STATIC_DIR / "product.html")
+
+@app.get("/wishlist")
+async def page_wishlist():
+    return FileResponse(STATIC_DIR / "wishlist.html")
+
+@app.get("/checkout")
+async def page_checkout():
+    return FileResponse(STATIC_DIR / "checkout.html")
+
+@app.get("/contact")
+async def page_contact():
+    return FileResponse(STATIC_DIR / "contact.html")
+
 # --- frontend ---
 @app.get("/")
 async def index():

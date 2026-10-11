@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aloqa — AZA FLOWERS</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Roboto:wght@300;400;500&family=Roboto+Slab:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css?v=33">
+<link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+</head>
+<body>
+<div class="topbar"><div class="container">
+  <span class="lang"><a href="/" class="on">🇺🇿 Uzbek</a><a href="/">RU</a></span>
+  <span class="tb"><b id="hPhone">+998 90 350 71 78</b></span>
+  <span class="sp"></span>
+  <span class="promo">Har hafta eng yaxshi takliflar!</span>
+  <span class="soc"><a id="socIg" target="_blank">◉</a><a id="socTg" target="_blank">✈</a></span>
+</div></div>
+<header class="header"><div class="container hmain">
+  <button class="burger" id="burger">☰</button>
+  <a class="logo" href="/"><img src="/static/logo.svg" alt="AZA"><span class="t"><b>AZA</b><small>FLOWERS • TASHKENT</small></span></a>
+  <nav class="c-top-menu"><a href="/shop">Katalog</a><a href="/sale">Aksiya</a><a href="/about">Biz haqimizda</a><a href="/contact">Aloqa</a></nav>
+  <div class="hicons"><span id="authArea"></span>
+    <button class="iconbtn" id="searchBtn">⌕</button>
+    <button class="iconbtn" id="wishBtn">♡<span class="n" id="wishN" style="display:none">0</span></button>
+    <button class="iconbtn" id="openCart">🛒<span class="n" id="cartN">0</span></button>
+  </div>
+</div></header>
+<div class="search-ov" id="searchOv"><button class="x" id="searchX">✕</button><div class="box"><input id="q" placeholder="Nom yoki artikul yozishni boshlang..." autocomplete="off"><p class="hint">Enter — qidirish</p></div></div>
+<aside class="mmenu" id="mmenu"><button class="x" id="mmenuX">✕</button><a href="/">Bosh sahifa</a><a href="/shop">Katalog</a><a href="/sale">Aksiya</a><a href="/about">Biz haqimizda</a><a href="/contact">Aloqa</a><a href="/track">Kuzatish</a></aside>
+<main class="container page" style="max-width:680px">
+  <span class="eyebrow">Aloqa</span>
+  <h1>Biz bilan bog'laning</h1>
+  <div class="obox"><div id="contactBox">Yuklanmoqda...</div>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><a class="btn btn-acc" id="tgBtn" target="_blank">Telegram yozish</a><a class="btn btn-outline" id="insBtn" target="_blank">Instagram</a></div>
+  </div>
+  <div class="obox"><h3 style="font-family:var(--serif);font-size:26px;font-weight:400;margin:0 0 10px">Xabar yuborish</h3>
+    <form class="form" id="contactForm">
+      <input id="cName" name="name" autocomplete="name" placeholder="Ismingiz *">
+      <input id="cPhone" name="phone" autocomplete="tel" inputmode="tel" placeholder="Telefon: +998 ... *">
+      <textarea id="cMsg" name="message" rows="4" placeholder="Xabaringiz *"></textarea>
+      <button class="btn btn-acc" style="width:100%">Yuborish →</button>
+    </form>
+  </div>
+</main>
+<footer>
+  <div class="container fgrid">
+    <div><b class="fh">Xaridorga</b><div class="flinks"><a href="/wishlist">Sevimlilar</a><a href="/cabinet">Akkaunt</a><a href="/track">Buyurtmani kuzatish</a></div></div>
+    <div><b class="fh">Ma'lumot</b><div class="flinks"><a href="/about">Biz haqimizda</a><a href="/contact">Kontaktlar</a><a href="/sale">Aksiya</a></div></div>
+    <div><b class="fh">Kontaktlar</b><div id="footContact"></div><div class="social"><a id="tgBtnF" target="_blank">✈</a><a id="insBtnF" target="_blank">◉</a></div></div>
+  </div>
+  <div class="fbottom"><div class="container fbin"><span>© 2026 AZA FLOWERS. Barcha huquqlar himoyalangan.</span><span class="paybadges"><span>CLICK</span><span>PAYME</span><span>UZCARD</span><span>HUMO</span><span>VISA</span></span></div></div>
+</footer>
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer"><div class="dhead"><span>Savat</span><button class="pill" id="closeCart">Yopish ✕</button></div><div class="dbody" id="cartBody"></div><div class="dfoot" id="cartFoot"></div></aside>
+<div class="modal" id="amodal"><div class="mbox" style="max-width:440px"><button class="mx" data-close>✕</button><div style="padding:26px"><h2 style="margin:0;font-family:var(--serif);font-size:34px;font-weight:400">Xush kelibsiz</h2><div class="tabs-sm"><button class="tab on" id="tabLogin">Kirish</button><button class="tab" id="tabReg">Ro'yxatdan o'tish</button></div><div class="form" id="paneLogin"><input id="lPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="lPass" type="password" placeholder="Parol"><button class="btn btn-acc" id="doLogin" style="width:100%">Kirish →</button></div><div class="form" id="paneReg" style="display:none"><input id="rName" placeholder="Ismingiz *"><input id="rPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="rPass" type="password" placeholder="Parol (kamida 4 belgi)"><button class="btn btn-acc" id="doReg" style="width:100%">Ro'yxatdan o'tish →</button></div></div></div></div>
+<div class="toast" id="toast"></div>
+<script src="/static/site.js?v=1"></script>
+</body></html>

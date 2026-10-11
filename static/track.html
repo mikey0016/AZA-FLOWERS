@@ -8,35 +8,43 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Roboto:wght@300;400;500&family=Roboto+Slab:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/style.css?v=31">
+<link rel="stylesheet" href="/static/style.css?v=33">
 <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
 </head>
 <body>
 <div class="topbar"><div class="container"><span class="lang"><a href="/" class="on">🇺🇿 Uzbek</a></span><span class="sp"></span><span class="promo">Har hafta eng yaxshi takliflar!</span></div></div>
 <header class="header"><div class="container hmain">
+<button class="burger" id="burger">☰</button>
 <a class="logo" href="/"><img src="/static/logo.svg" alt="AZA"><span class="t"><b>AZA</b><small>FLOWERS • TASHKENT</small></span></a>
-<nav class="c-top-menu"><a href="/">Bosh sahifa</a><a href="/#katalog">Katalog</a><a href="/about">Biz haqimizda</a><a href="/track">Kuzatish</a></nav>
-<div class="hicons"><span id="authArea"></span></div>
+<nav class="c-top-menu"><a href="/shop">Katalog</a><a href="/sale">Aksiya</a><a href="/about">Biz haqimizda</a><a href="/contact">Aloqa</a></nav>
+<div class="hicons"><span id="authArea"></span><button class="iconbtn" id="searchBtn">⌕</button><button class="iconbtn" id="wishBtn">♡<span class="n" id="wishN" style="display:none">0</span></button><button class="iconbtn" id="openCart">🛒<span class="n" id="cartN">0</span></button></div>
 </div></header>
+<div class="search-ov" id="searchOv"><button class="x" id="searchX">✕</button><div class="box"><input id="q" placeholder="Nom yoki artikul yozishni boshlang..." autocomplete="off"><p class="hint">Enter — qidirish</p></div></div>
+<aside class="mmenu" id="mmenu"><button class="x" id="mmenuX">✕</button><a href="/">Bosh sahifa</a><a href="/shop">Katalog</a><a href="/sale">Aksiya</a><a href="/about">Biz haqimizda</a><a href="/contact">Aloqa</a><a href="/track">Kuzatish</a></aside>
 <main class="container page" style="max-width:640px">
   <span class="eyebrow">Kuzatish</span>
   <h1>Buyurtmani kuzatish</h1>
   <p style="color:var(--body)">Buyurtma raqami va telefoningizni kiriting.</p>
   <div class="obox"><div class="form">
-    <input id="tId" placeholder="Buyurtma raqami (masalan: 833087)" inputmode="numeric">
-    <input id="tPhone" placeholder="Telefon: +998 ..." inputmode="tel">
+    <input id="tId" name="order" inputmode="numeric" autocomplete="off" placeholder="Buyurtma raqami (masalan: 833087)">
+    <input id="tPhone" name="phone" autocomplete="tel" inputmode="tel" placeholder="Telefon: +998 ...">
     <button class="btn btn-acc" id="tGo" style="width:100%">Topish →</button>
   </div><div id="tRes" style="margin-top:14px"></div></div>
+  <p class="hint">Akkauntingiz bormi? <a href="/cabinet" style="color:var(--accent-dark)">Kabinetda</a> barcha buyurtmalar ko'rinadi.</p>
 </main>
 <footer>
   <div class="container fgrid">
-    <div><b class="fh">Xaridorga</b><div class="flinks"><a href="/cabinet">Akkaunt</a><a href="/#katalog">Katalog</a></div></div>
-    <div><b class="fh">Ma'lumot</b><div class="flinks"><a href="/about">Kontaktlar</a><a href="/about">To'lov va yetkazish</a></div></div>
+    <div><b class="fh">Xaridorga</b><div class="flinks"><a href="/wishlist">Sevimlilar</a><a href="/cabinet">Akkaunt</a></div></div>
+    <div><b class="fh">Ma'lumot</b><div class="flinks"><a href="/about">Biz haqimizda</a><a href="/contact">Aloqa</a></div></div>
     <div><b class="fh">Kontaktlar</b><div id="footContact"></div></div>
   </div>
   <div class="fbottom"><div class="container fbin"><span>© 2026 AZA FLOWERS. Barcha huquqlar himoyalangan.</span></div></div>
 </footer>
-<script src="/static/auth.js?v=20"></script>
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer"><div class="dhead"><span>Savat</span><button class="pill" id="closeCart">Yopish ✕</button></div><div class="dbody" id="cartBody"></div><div class="dfoot" id="cartFoot"></div></aside>
+<div class="modal" id="amodal"><div class="mbox" style="max-width:440px"><button class="mx" data-close>✕</button><div style="padding:26px"><h2 style="margin:0;font-family:var(--serif);font-size:34px;font-weight:400">Xush kelibsiz</h2><div class="tabs-sm"><button class="tab on" id="tabLogin">Kirish</button><button class="tab" id="tabReg">Ro'yxatdan o'tish</button></div><div class="form" id="paneLogin"><input id="lPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="lPass" type="password" placeholder="Parol"><button class="btn btn-acc" id="doLogin" style="width:100%">Kirish →</button></div><div class="form" id="paneReg" style="display:none"><input id="rName" placeholder="Ismingiz *"><input id="rPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="rPass" type="password" placeholder="Parol (kamida 4 belgi)"><button class="btn btn-acc" id="doReg" style="width:100%">Ro'yxatdan o'tish →</button></div></div></div></div>
+<div class="toast" id="toast"></div>
+<script src="/static/site.js?v=1"></script>
 <script>
 const fmtT=n=>n.toLocaleString('uz-UZ').replace(/,/g,' ')+" so'm";
 const ST={'qabul':'Qabul qilingan','yangi':'Tayyorlanmoqda','awaiting_payment':"To'lov kutilmoqda",'awaiting_confirm':'Chek tekshirilmoqda','accepted':'Qabul qilingan','preparing':'Tayyorlanmoqda','delivering':"Yo'lda",'delivered':'Yetkazildi','closed':'Yakunlandi','cancelled':'Bekor qilindi','rejected':'Rad etildi'};
@@ -51,7 +59,8 @@ document.getElementById('tGo').onclick=async()=>{
     if(!r.ok){box.innerHTML='<div class="empty">Buyurtma topilmadi — ma\'lumotlarni tekshiring</div>';return}
     const o=await r.json();
     const st=OKST.includes(o.status)?`<span class="st st-ok">${ST[o.status]||o.status}</span>`:`<span class="st st-new">${ST[o.status]||o.status}</span>`;
-    box.innerHTML=`<div class="oline"><div><b>#${o.id}</b> ${st}<div style="color:var(--muted);font-size:13px">${o.created_at} • ${o.lines.map(l=>l.name+' × '+l.qty).join(', ')}</div></div><b>${fmtT(o.total)}</b></div>`;
+    box.innerHTML=`<div class="oline"><div><b>#${o.id}</b> ${st}<div style="color:var(--muted);font-size:13px">${o.created_at} • ${(o.lines||[]).map(l=>l.name+' × '+l.qty).join(', ')}</div></div><b>${fmtT(o.total)}</b></div>
+    <div class="sumrow"><span>Jami</span><b>${fmtT(o.total)}</b></div>${o.prepay?`<div class="sumrow pre"><span>Oldindan</span><b>${fmtT(o.prepay)}</b></div>`:''}`;
   }catch(e){box.innerHTML='<div class="empty">Xatolik — qayta urining</div>'}
 };
 </script>

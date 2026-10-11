@@ -217,7 +217,7 @@ function revGeoD(lat,lon){
       if(fa&&addr)fa.value=addr;
       const dist=a.suburb||a.city_district||a.district||a.neighbourhood||a.quarter||a.town||a.village||'';
       const fc=document.getElementById('fCity');
-      if(fc&&dist&&!fc.value)fc.value=dist;
+      if(fc&&dist)fc.value=dist;
       const n=normWD(a.state||a.county||a.city||'').replace(/[^a-z ]/g,'');
       let reg=ISO[a['ISO3166-2-lvl4']]||'';
       if(!reg)for(const o of REGIONS){

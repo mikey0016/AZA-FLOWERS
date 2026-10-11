@@ -8,55 +8,64 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Roboto:wght@300;400;500&family=Roboto+Slab:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/style.css?v=31">
+<link rel="stylesheet" href="/static/style.css?v=33">
 <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
 </head>
 <body>
 <div class="topbar"><div class="container"><span class="lang"><a href="/" class="on">🇺🇿 Uzbek</a></span><span class="sp"></span><span class="promo">Har hafta eng yaxshi takliflar!</span></div></div>
 <header class="header"><div class="container hmain">
+<button class="burger" id="burger">☰</button>
 <a class="logo" href="/"><img src="/static/logo.svg" alt="AZA"><span class="t"><b>AZA</b><small>FLOWERS • TASHKENT</small></span></a>
-<nav class="c-top-menu"><a href="/">Bosh sahifa</a><a href="/#katalog">Katalog</a><a href="/about">Biz haqimizda</a><a href="/track">Kuzatish</a></nav>
-<div class="hicons"><span id="authArea"></span></div>
+<nav class="c-top-menu"><a href="/shop">Katalog</a><a href="/sale">Aksiya</a><a href="/about">Biz haqimizda</a><a href="/contact">Aloqa</a></nav>
+<div class="hicons"><span id="authArea"></span><button class="iconbtn" id="searchBtn">⌕</button><button class="iconbtn" id="wishBtn">♡<span class="n" id="wishN" style="display:none">0</span></button><button class="iconbtn" id="openCart">🛒<span class="n" id="cartN">0</span></button></div>
 </div></header>
+<div class="search-ov" id="searchOv"><button class="x" id="searchX">✕</button><div class="box"><input id="q" placeholder="Nom yoki artikul yozishni boshlang..." autocomplete="off"><p class="hint">Enter — qidirish</p></div></div>
+<aside class="mmenu" id="mmenu"><button class="x" id="mmenuX">✕</button><a href="/">Bosh sahifa</a><a href="/shop">Katalog</a><a href="/sale">Aksiya</a><a href="/about">Biz haqimizda</a><a href="/contact">Aloqa</a><a href="/track">Kuzatish</a></aside>
 <main class="container page" style="max-width:760px">
   <span class="eyebrow">Akkaunt</span>
   <h1>Mening buyurtmalarim</h1>
   <div id="myBox"></div>
+  <div style="margin-top:18px"><a class="btn btn-outline" href="/wishlist">♡ Sevimlilarim →</a></div>
 </main>
 <footer>
   <div class="container fgrid">
-    <div><b class="fh">Xaridorga</b><div class="flinks"><a href="/#katalog">Katalog</a><a href="/track">Kuzatish</a></div></div>
-    <div><b class="fh">Ma'lumot</b><div class="flinks"><a href="/about">Kontaktlar</a><a href="/about">To'lov va yetkazish</a></div></div>
+    <div><b class="fh">Xaridorga</b><div class="flinks"><a href="/wishlist">Sevimlilar</a><a href="/track">Kuzatish</a></div></div>
+    <div><b class="fh">Ma'lumot</b><div class="flinks"><a href="/about">Biz haqimizda</a><a href="/contact">Aloqa</a></div></div>
     <div><b class="fh">Kontaktlar</b><div id="footContact"></div></div>
   </div>
   <div class="fbottom"><div class="container fbin"><span>© 2026 AZA FLOWERS. Barcha huquqlar himoyalangan.</span></div></div>
 </footer>
-<script src="/static/auth.js?v=20"></script>
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer"><div class="dhead"><span>Savat</span><button class="pill" id="closeCart">Yopish ✕</button></div><div class="dbody" id="cartBody"></div><div class="dfoot" id="cartFoot"></div></aside>
+<div class="modal" id="amodal"><div class="mbox" style="max-width:440px"><button class="mx" data-close>✕</button><div style="padding:26px"><h2 style="margin:0;font-family:var(--serif);font-size:34px;font-weight:400">Xush kelibsiz</h2><div class="tabs-sm"><button class="tab on" id="tabLogin">Kirish</button><button class="tab" id="tabReg">Ro'yxatdan o'tish</button></div><div class="form" id="paneLogin"><input id="lPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="lPass" type="password" placeholder="Parol"><button class="btn btn-acc" id="doLogin" style="width:100%">Kirish →</button></div><div class="form" id="paneReg" style="display:none"><input id="rName" placeholder="Ismingiz *"><input id="rPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="rPass" type="password" placeholder="Parol (kamida 4 belgi)"><button class="btn btn-acc" id="doReg" style="width:100%">Ro'yxatdan o'tish →</button></div></div></div></div>
+<div class="toast" id="toast"></div>
+<script src="/static/site.js?v=1"></script>
 <script>
 const fmtC=n=>n.toLocaleString('uz-UZ').replace(/,/g,' ')+" so'm";
 const ST={'qabul':'Qabul qilingan','yangi':'Tayyorlanmoqda','awaiting_payment':"To'lov kutilmoqda",'awaiting_confirm':'Chek tekshirilmoqda','accepted':'Qabul qilingan','preparing':'Tayyorlanmoqda','delivering':"Yo'lda",'delivered':'Yetkazildi','closed':'Yakunlandi','cancelled':'Bekor qilindi','rejected':'Rad etildi'};
 const OKST=['qabul','accepted','preparing','delivering','delivered','closed'];
+function tok(){return localStorage.getItem('aza_token')}
 (async()=>{
   const box=document.getElementById('myBox');
-  if(!Auth.token){
+  if(!tok()){
     box.innerHTML=`<div class="obox"><h3 style="font-family:var(--serif);font-size:26px;font-weight:400;margin-bottom:8px">Kirish talab qilinadi</h3><p style="color:var(--body)">Buyurtmalaringizni ko'rish uchun kiring.</p><div class="form"><input id="cPhone" placeholder="Telefon: +998 ..." inputmode="tel"><input id="cPass" type="password" placeholder="Parol"><button class="btn btn-acc" id="cGo" style="width:100%">Kirish →</button></div></div>`;
     document.getElementById('cGo').onclick=async()=>{
       const ph=document.getElementById('cPhone').value.trim(),pw=document.getElementById('cPass').value;
       const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:ph,password:pw})});
       const d=await r.json();
       if(!r.ok){box.insertAdjacentHTML('beforeend','<p class="hint">'+(d.detail||'Xatolik')+'</p>');return}
-      Auth.save(d.token,d.user);location.reload();
+      localStorage.setItem('aza_token',d.token);localStorage.setItem('aza_user',JSON.stringify(d.user));location.reload();
     };
     return;
   }
   box.innerHTML='<div class="empty">Yuklanmoqda...</div>';
-  const r=await fetch('/api/orders/mine',{headers:Auth.headers()});
-  if(r.status===401){Auth.clear();location.reload();return}
+  const r=await fetch('/api/orders/mine',{headers:{'Authorization':'Bearer '+tok()}});
+  if(r.status===401){localStorage.removeItem('aza_token');localStorage.removeItem('aza_user');location.reload();return}
   const orders=await r.json();
-  if(!orders.length){box.innerHTML='<div class="empty">Hali buyurtmalaringiz yo\'q<br><a class="btn btn-acc" style="margin-top:12px;display:inline-block" href="/#katalog">Gul tanlash</a></div>';return}
+  if(!orders.length){box.innerHTML='<div class="empty">Hali buyurtmalaringiz yo\'q<br><a class="btn btn-acc" style="margin-top:12px;display:inline-block" href="/shop">Gul tanlash</a></div>';return}
   box.innerHTML=orders.map(o=>{
     const st=OKST.includes(o.status)?`<span class="st st-ok">${ST[o.status]||o.status}</span>`:`<span class="st st-new">${ST[o.status]||o.status}</span>`;
-    return `<div class="oline"><div><b>#${o.id}</b> ${st}<div style="color:var(--muted);font-size:13px">${o.created_at} • ${o.lines.map(l=>l.name+' × '+l.qty).join(', ')}</div></div><b>${fmtC(o.total)}</b></div>`;
+    return `<div class="oline"><div><b>#${o.id}</b> ${st}<div style="color:var(--muted);font-size:13px">${o.created_at} • ${(o.lines||[]).map(l=>l.name+' × '+l.qty).join(', ')}</div></div><b>${fmtC(o.total)}</b></div>`;
   }).join('');
 })();
 </script>
