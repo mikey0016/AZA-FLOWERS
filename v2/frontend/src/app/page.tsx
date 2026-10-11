@@ -3,8 +3,6 @@ import { getCategories, getProducts } from "@/lib/api";
 import ProductCard from "@/components/ProductCard";
 import HomeClient from "./home-client";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home() {
   const [cats, hits, news, sale] = await Promise.all([
     getCategories().catch(() => []),

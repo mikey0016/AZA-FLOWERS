@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
-const API_URL = process.env.API_URL || "http://127.0.0.1:8000";
-
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: "export",
   turbopack: {
     rules: {
       "*.css": {
@@ -11,9 +9,6 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
-  },
-  async rewrites() {
-    return [{ source: "/api/v2/:path*", destination: `${API_URL}/api/v2/:path*` }];
   },
 };
 

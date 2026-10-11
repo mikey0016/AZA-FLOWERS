@@ -6,7 +6,14 @@ import FlowerArt from "@/components/FlowerArt";
 import BuyBox from "./buy-box";
 import ProductCard from "@/components/ProductCard";
 
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+  try {
+    const items = await getProducts({});
+    return items.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
