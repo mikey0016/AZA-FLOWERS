@@ -335,9 +335,9 @@ def dispatch(base: Path, update: dict) -> None:
         d = cb.get("data", "")
         if d.startswith("padd:"):
             handle_padd_callback(base, cb)
-        elif d == "plist" or d.startswith("p:") or d.startswith("pdel:") or d.startswith("f:") or d.startswith("e:") or d in ("add_new", "add_ok", "add_no") or d.startswith("c:"):
+        elif d == "products" or d == "plist" or d.startswith("p:") or d.startswith("pdel:") or d.startswith("f:") or d.startswith("e:") or d in ("add_new", "add_ok", "add_no") or d.startswith("c:"):
             handle_product_callback(base, cb)
-        elif d.startswith("order:") or d.startswith("olist:") or d.startswith("view:") or d.startswith("panel:") or d in ("stats", "promos", "ocard") or d.startswith("promo_del:") or d.startswith("recv:"):
+        elif d == "orders:10" or d.startswith("orders:") or d.startswith("order:") or d.startswith("olist:") or d.startswith("view:") or d.startswith("panel:") or d in ("stats", "promos", "ocard") or d.startswith("promo_del:") or d.startswith("recv:"):
             handle_order_callback(base, cb)
         else:
             handle_callback(base, cb)
@@ -455,7 +455,10 @@ def handle_product_callback(base: Path, cb: dict) -> None:
             pass
 
     parts = data.split(":")
-    if data == "plist":
+    if data == "products":
+        send_product_list(base, cid)
+        answer("Mahsulotlar")
+    elif data == "plist":
         items = pstore.get_products(base)
         edit_to(base, cid, mid, f"🌷 <b>Mahsulotlar ({len(items)} ta)</b>\nTahrirlash uchun tanlang:",
                 product_list_markup(items))
